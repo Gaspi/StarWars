@@ -1,0 +1,28 @@
+
+
+presentation_perso :
+ les arguments attendus sont deux entiers a et b, presente
+ le personnage du tableau à l'endroit (a).(b)
+
+presentation_niveau :
+ Deux entier attendus, ouvre une fenêtre avec l'image du niveau.
+
+jouer :
+ 4 nouveaux arguments : forces.
+   Si elles sont mises à 0. (ou x <= 0.), rien n'est changé sur les personnages.
+   Sinon, les personnages sont automatiquement équilibrés et leur force est proportionnelle à la valeur entrée.
+
+ Le dernier argument est le choix du niveau, il ne porte plus de label.
+
+ Tout les autres aguments sont facultatifs (à part j1, j2 et j3)
+
+
+Nouvelle fonction :
+ creer perso : crée un nouveaux perso dans le dossier perso
+ portant le nom de ce perso (le perso est automatiquement équilibré)
+ Pour jouer avec un personnage sauvegardé, dans la fonction
+ jouer, au lieu de choisir j1:"0x0", parametrer selon :
+	j1:"->nomdemonperso"
+ 
+ 
+ 

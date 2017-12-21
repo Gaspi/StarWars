@@ -1,0 +1,99 @@
+
+
+  <<< La guerre des planètes >>>
+v 1.0
+
+
+But du jeu :
+ Conquérir toute la carte de l'espace et anéantir vos adversaires.
+
+Règles :
+ Chaque planète appartient soit à un joueur (elle est alors de sa couleur :
+ joueur 1 : blue, joueur 2 : rouge, joueur 3 : vert) soit à personne elle est alors
+ grise.
+ Une planète possède un population et un revenu indiqués par les chiffres centraux :
+ 	population / revenu
+ La population d'une planète augmente de "revenu" régulièrement.
+ Pour conquérir une autre planète un joueur doit sélectionner une planète de départ
+ lui appartenant et désigner une cible pouvant être atteinte par une route (en blanc).
+ La totalité de la population de la planète est alors envoyée pour conquérir la cible.
+ Si des rencontres ont lieu pendant le trajet, il y a combat spatial.
+En plus de ces règles de bases viennent s'ajouter des bonus de civilisation (voir plus bas).
+
+
+Menu :
+ Choisir une civilisation pour chaque joueur, spécifier s'il doit être joué ou non par
+ une intelligence artificelle (case ordi), sélectionner un niveau.
+ Attention :
+  Les personnage marqués "bloqués" ne peuvent être joués par des humains.
+  Pour débloquer un personnage, il faut gagner en duel (niveau "Duel !") contre lui.
+  (Une victoire est comptabilisée ssi la fenêtre du jeu est fermée après que toutes les planètes
+   soient la propriété d'un unique joueur et qu'il n'y ait plus de vaisseau sur aucune route et
+   qu'il se soit écoulé un tour de revenu dans cet état du jeu)
+ Remarque : les intelligence artificielle peuvent jouer n'importe quel civilisation.
+
+
+Touches :
+ aqwzsxedcrfv&é : Touches de selection du joueur 1 (bleu) (voir planète -> symbole du bas)
+ 123456789+*-/0 : Touches de selection du joueur 2 (rouge) (voir planète -> symbole du haut)
+ Souris         : Touches de selection du joueur 3 (vert)
+ Echap :          Quitter
+ k :              autosynchronize false
+ l / m :          Régler la vitesse du jeu
+ p :              Pause
+
+
+Caracteristiques des joueurs :
+
+ Vitesse : vitesse des vaisseaux de combat.
+ Defense : facteur multiplicatif appliqué aux armées lors d'un combat pour la défense
+	  d'une planète.
+ Attaque : facteur multiplciatif appliqué aux armées lors d'un combat pour l'attaque
+	  d'une planète.
+ Vol     : facteur multiplicatif appliqué aux armées lors d'un combat ayant lieu le
+	  long d'une route spatiale.
+ Culture :
+   - Moyennageuse : pas de revenu (typiquement le joueur gris (neutre) ).
+   - Fermière : revenu de 1 quelle que soit la planète.
+   - Industrielle : revenu de 2 quelle que soit la planète.
+   - Adaptée : revenu indiqué par la planète.
+   - Riche : revenu indiqué par le planète + 1 si ce revenu est inférieur (ou égal) à 1.
+
+ Avantages :
+   - Terrifiant : 1/3 chance de renvoyer les adversaires lors d'un combat perdu en vol.
+   - Défenseur : 1/3 chance de renvoyer les adversaires qui atteignent une planète.
+   - Furtif : 1/3 chance d'éviter le combat quand il est perdu en vol.
+   - Diplomatie (vol, atk ou def) : 1/8 chance de ne pas être blessé lors d'une victoire
+	1/8 chance de convertir les unitées ennemies lors d'une victoire.
+   - Conquérant : gagne 6 * la production d'une planete quand il la capture.
+
+Pour créer son propre perso :
+
+ Facteur multiplicatif des paramètres de combats liés aux bonus :
+Défenseur : 0.87
+Terrifiant : 0.94
+Dipl_def : 0.95
+Dipl_atk : 0.95
+Dipl_vol : 0.92
+Furtif : 0.96
+Conquerant : 0.95
+Civilisation:
+ Fermière : 2.
+ Adaptee : 1.
+ Industrielle : 0.85
+ Riche : 0.8
+Vitesse : vit ^ (-1/3)
+
+
+
+Installation :
+
+Pour installer le jeu, rien à faire que de lancer jeu.ml avec caml après avoir modifier
+toutes les adresses en débuts des fichiers b.ml et d.ml par celle correspondant au dossier
+dans lequel à été placé le jeu.
+
+
+
+
+made by Gaspi
+
