@@ -1,6 +1,6 @@
 
-#use "D:\\Multimedia\\Downloads\\Star Wars\\b.ml";;
-#use "D:\\Multimedia\\Downloads\\Star Wars\\c.ml";;
+#use "D:\\Programmation\\OCaml\\StarWars\\b.ml";;
+#use "D:\\Programmation\\OCaml\\StarWars\\c.ml";;
 
 (*
 open Traiteimg;;

@@ -1,7 +1,7 @@
 
-#use "D:\\Multimedia\\Downloads\\Star Wars\\a.ml";;
+#use "D:\\Programmation\\OCaml\\StarWars\\a.ml";;
 
-let adresse = "C:\\Users\\pp\\Desktop\\Jeux caml\\Star Wars";;
+let adresse = "D:\\Programmation\\OCaml\\StarWars";;
 
 
 
