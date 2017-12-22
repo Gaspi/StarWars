@@ -2,16 +2,9 @@
 open Png
 open Kernel
 open Cypher
-
-(*
-open Traiteimg
-open Starwars
-open Codage
-*)
-
 open Graphics
 
-let neutre_base =
+let neutre_base : joueur =
   {
     vit = 1.;
     def=1.1;
@@ -27,7 +20,7 @@ let neutre_base =
     civi=Neanderthal
   }
 
-let ordi_base =
+let ordi_base : joueur =
   {
     vit = 1.1;
     def=1.1;
@@ -127,28 +120,29 @@ let niveaux_3j = charge_niveau (adresse ^ "\\include\\lvl3j.txt")
 let niveaux_2j = charge_niveau (adresse ^ "\\include\\lvl2j.txt")
 let tab_niveaux = [|niveaux_2j; niveaux_3j; niveaux_4j |]
 
-let presentation_pers (a,b) =
-    print_string (
-    a ^ "\n\n" ^
-    "Vitesse  :  " ^ (string_of_int (int_of_float (100. *. b.vit))) ^ "\n" ^
-    "Attaque  :  " ^ (string_of_int (int_of_float (100. *. b.atk))) ^ "\n" ^
-    "Défense  :  " ^ (string_of_int (int_of_float (100. *. b.def))) ^ "\n" ^
-    "Combat spatial  :  " ^ (string_of_int (int_of_float (100. *. b.vol))) ^ "\n" ^
-    "Civilisation  :  " ^ (match b.civi with
-        |Neanderthal -> "Moyennageuse"
-        |Fermier -> "Fermière"
-        |Industriel -> "Industrielle"
-        |Riche -> "Riche"
-        |Adaptee -> "Adaptée") ^ "\n" ^
-    "<<< Bonus >>>\n" ^
-    (if b.terrifiant then " - Terrifiant\n" else "") ^
-    (if b.defenseur then " - Défenseur\n" else "") ^
-    (if b.furtif then " - Furtif\n" else "") ^
-    (if b.dipl_vol then " - Diplomate spatial\n" else "") ^
-    (if b.dipl_atk then " - Diplomate attaquant\n" else "") ^
-    (if b.dipl_def then " - Diplomate defenseur\n" else "") ^
-    (if b.conquerant then " - Conquérant\n" else ""))
+let print_civi = function
+  | Neanderthal -> "Moyennageuse"
+  | Fermier     -> "Fermière"
+  | Industriel  -> "Industrielle"
+  | Riche       -> "Riche"
+  | Adaptee     -> "Adaptée"
 
+let print_perso (a,b) =
+  print_string (
+    a ^ "\n\n" ^
+    "Vitesse  :  "        ^ (string_of_int (int_of_float (100. *. b.vit))) ^ "\n" ^
+    "Attaque  :  "        ^ (string_of_int (int_of_float (100. *. b.atk))) ^ "\n" ^
+    "Défense  :  "        ^ (string_of_int (int_of_float (100. *. b.def))) ^ "\n" ^
+    "Combat spatial  :  " ^ (string_of_int (int_of_float (100. *. b.vol))) ^ "\n" ^
+    "Civilisation  :  "   ^ (print_civi b.civi) ^ "\n" ^
+    "<<< Bonus >>>\n" ^
+    (if b.terrifiant then " - Terrifiant\n"          else "") ^
+    (if b.defenseur  then " - Défenseur\n"           else "") ^
+    (if b.furtif     then " - Furtif\n"              else "") ^
+    (if b.dipl_vol   then " - Diplomate spatial\n"   else "") ^
+    (if b.dipl_atk   then " - Diplomate attaquant\n" else "") ^
+    (if b.dipl_def   then " - Diplomate defenseur\n" else "") ^
+    (if b.conquerant then " - Conquérant\n"          else ""))
 
 let presentation_niveau a b =
     let (x,_) = tab_niveaux.(a).(b) in
@@ -170,17 +164,16 @@ let dos s =
     int_of_string (String.sub s (!i+1) (String.length s - !i-1))
 
 let perso_of_string mot =
-    match mot.[0] with
-    |'-' -> if mot.[1] <> '>' then failwith "commencer par '->'"
-        else begin
-            let nom = String.sub mot 2 (String.length mot - 2) in
-            let (a,b) = (nom, (charge_perso (adresse ^ "\\persos/" ^
-                nom ^ ".txt") ).(0)) in
-            b end
-    |_ -> let (a,b) = dos mot in
-        tab_persos.(a).(b)
+  match mot.[0] with
+  | '-' -> if mot.[1] <> '>' then failwith "commencer par '->'"
+    else begin
+      let nom = String.sub mot 2 (String.length mot - 2) in
+      (charge_perso (adresse ^ "\\persos/" ^ nom ^ ".txt") ).(0)
+    end
+  |_ -> let (a,b) = dos mot in
+    tab_persos.(a).(b)
 
-let presentation_perso s = presentation_pers (perso_of_string s)
+let print_perso_by_name s = print_perso (perso_of_string s)
 
 let creer_perso
     ?(conquerant=false)
@@ -208,7 +201,7 @@ let creer_perso
     } in
   let a = equilibrer 1. perso in
   print_endline "personnage créé :"; print_newline ();
-  presentation_pers (nom, a);
+  print_perso (nom, a);
   perso_save (adresse ^ "\\persos/" ^ nom ^ ".txt") (nom, a)
 
 

@@ -1,12 +1,13 @@
 
+open Kernel
 open Front
 
 (* La table des personnages est de dimension 3 * 8. *)
 
 let _ =
   begin
-    presentation_perso "->napoléon";
-    presentation_perso "2x4";
+    print_perso_by_name "->napoléon";
+    print_perso_by_name "2x4";
     
     presentation_niveau 2 1;
     
@@ -33,7 +34,7 @@ let _ =
       ~diplomatie_attaque:true
       ~defenseur:false
       ~terrifiant:false
-      ~civilisation:Kernel.Adaptee
+      ~civilisation:Adaptee
       ~conquerant:false
       ~attaque:1.0
       ~defense:1.0
@@ -47,7 +48,7 @@ let _ =
     let affiche_colonne_perso j =
       for i = 0 to 7 do
         print_int i; print_string " : ";
-        presentation_perso tab_persos.(j).(i);
+        print_perso tab_persos.(j).(i);
         print_newline (); print_newline ()
       done in
     
