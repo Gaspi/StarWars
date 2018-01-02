@@ -1,9 +1,7 @@
 
+open Basic
 open Graphics
 open Png
-
-
-let adresse = "D:\\Programmation\\OCaml\\StarWars"
 
 
 (* code du jeu *)
@@ -13,14 +11,11 @@ let deltay = 0
 
 let (boom_img1, boom_img2, boom_img3) =
   begin
-    open_graph "1x1";
+    open_graph " 1x1";
     let res = (
-      set_color_transp black (fst (get_img_bmp
-                                     (adresse ^ "\\include\\boom1"))),
-      set_color_transp black (fst (get_img_bmp
-                                     (adresse ^ "\\include\\boom2"))),
-      set_color_transp black (fst (get_img_bmp
-                                     (adresse ^ "\\include\\boom3"))) ) in
+      set_color_transp black (fst (get_img_bmp (get_full_path "boom1"))),
+      set_color_transp black (fst (get_img_bmp (get_full_path "boom2"))),
+      set_color_transp black (fst (get_img_bmp (get_full_path "boom3"))) ) in
     close_graph ();
     res
   end
@@ -468,7 +463,7 @@ let jour_de_paye () =
 end
 in
 
-open_graph ((string_of_int taillex) ^ "x" ^ (string_of_int (tailley+deltay)));
+open_graph (" " ^ (string_of_int taillex) ^ "x" ^ (string_of_int (tailley+deltay)));
 begin
   let t0 = Sys.time () in
   while Sys.time () -. t0 < 0.5 do

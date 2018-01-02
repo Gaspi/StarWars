@@ -56,26 +56,26 @@ let coder ?(code=97) ?(decalage=147) ?(graine=(0,0,0)) message =
     res
 
 let decoder ?(code=97) ?(decalage=147) message =
-    let cd = trouve_inverse ~modulo:255 (code mod 255) in
-    let dec = decalage mod 255 in
-    let t = String.length message in
-    if t < 3 then failwith "message trop court";
-    let res = String.make ((t - 3) / 2) ' ' in
-    let (a,b,c) = (ref (ioc message.[0]), ref (ioc message.[1]),
-        ref (ioc message.[2])) in
-    let i = ref 3 in
-    while !i < t do
-        res.[(!i-3)/2] <- char_of_int
-            (((((ioc message.[!i]) * cd) mod 255)
-                - dec + 255) mod 255);
-        incr i;
-        let aux = (!a + !b + !c) mod 255 in
-        a := !b; b := !c; c := aux;
-        if ioc message.[!i] <> !c then
-            failwith "code erroné";
-        incr i
-    done;
-    res
+  let cd = trouve_inverse ~modulo:255 (code mod 255) in
+  let dec = decalage mod 255 in
+  let t = String.length message in
+  if t < 3 then failwith "message trop court";
+  let res = String.make ((t - 3) / 2) ' ' in
+  let (a,b,c) = (ref (ioc message.[0]), ref (ioc message.[1]),
+                 ref (ioc message.[2])) in
+  let i = ref 3 in
+  while !i < t do
+    res.[(!i-3)/2] <- char_of_int
+        (((((ioc message.[!i]) * cd) mod 255)
+          - dec + 255) mod 255);
+    incr i;
+    let aux = (!a + !b + !c) mod 255 in
+    a := !b; b := !c; c := aux;
+    if ioc message.[!i] <> !c then
+      failwith "code erroné";
+    incr i
+  done;
+  res
 
 let coupe_ligne s =
     let res = ref [] in
@@ -113,7 +113,9 @@ let coder_sauver ?(code=97) ?(decalage=147) ?(graine=(0,0,0)) nom_fic message =
     enregistrer nom_fic (coder ~code:code ~decalage:decalage ~graine:graine message)
 
 let decoder_charger ?(code=97) ?(decalage=147) nom_fic =
-    decoder ~code:code ~decalage:decalage (charger nom_fic)
+  let res = decoder ~code:code ~decalage:decalage (charger nom_fic) in
+  Basic.debug "gasp";
+  res
 
 let lit_string (tab, i) = incr i; tab.(!i)
 let lit_float x = float_of_string (lit_string x)

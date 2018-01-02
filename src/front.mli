@@ -2,9 +2,12 @@
 open Kernel
 open Cypher
 
-val tab_persos : (string * 'a) array array
+val tab_persos : (string * joueur) array array
+
 val presentation_niveau : int -> int -> unit
-val presentation_perso : string -> unit
+
+val presentation_perso : string * Kernel.joueur -> unit
+val presentation_perso_by_name : string -> unit
 
 val creer_perso :?conquerant:bool ->
   ?furtif:bool ->
@@ -14,7 +17,10 @@ val creer_perso :?conquerant:bool ->
   ?defenseur:bool ->
   ?terrifiant:bool ->
   ?civilisation:culture ->
-  attaque:'b -> defense:'c -> combat_spatial:'d -> vitesse:'e -> string -> 'f
+  attaque:float ->
+  defense:float ->
+  combat_spatial:float ->
+  vitesse:float -> string -> unit
 
 
 val jouer :

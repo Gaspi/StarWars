@@ -1,7 +1,4 @@
 
-val adresse : string
-
-
 type culture = Neanderthal | Fermier | Industriel | Riche | Adaptee
 
 type joueur =

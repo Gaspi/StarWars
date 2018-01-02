@@ -5,8 +5,8 @@ open Front
 
 let _ =
   begin
-    presentation_perso "->napoléon";
-    presentation_perso "2x4";
+    presentation_perso_by_name "->napoléon";
+    presentation_perso_by_name "2x4";
     
     presentation_niveau 2 1;
     

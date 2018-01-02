@@ -1,14 +1,16 @@
 
-MENHIR = -menhir "menhir --external-tokens Tokens"
+MENHIR=-menhir "menhir --external-tokens Tokens"
 
-SRC_DIRS = src
+PKG=graphics
+
+SRC_DIRS=src
 
 BINARIES=starwars
 
 all: starwars
 
 starwars:
-	ocamlbuild -Is $(SRC_DIRS) $(MENHIR) -lib unix starwars.native
+	ocamlbuild -Is $(SRC_DIRS) $(MENHIR) -lib unix -pkg $(PKG) starwars.native
 
 clean:
 	ocamlbuild -clean

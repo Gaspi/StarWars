@@ -1,13 +1,8 @@
 
+open Basic
 open Png
 open Kernel
 open Cypher
-
-(*
-open Traiteimg
-open Starwars
-open Codage
-*)
 
 open Graphics
 
@@ -38,6 +33,8 @@ let ordi_base =
     dipl_def=false;conquerant=false;civi=Adaptee
   }
 
+let _ = debug adresse
+
 let lit_perso tab =
   let gf () = lit_float tab in
   let gb () = lit_bool tab in
@@ -56,6 +53,7 @@ let lit_perso tab =
 
 let charge_perso nom_fic =
   let tab = (coupe_ligne (decoder_charger nom_fic), ref (-1)) in
+  debug "gasp";
   Array.map (fun () -> lit_perso tab) (Array.make (Array.length (fst tab) / 13) ())
 
 let met_perso (nom,j) l =
@@ -85,6 +83,7 @@ let maod taille tab =
     res.(y-1).(x-1) <- true
   done;
   res
+
 
 let lit_niveau (tab,i) =
   let gi () = lit_int (tab,i) in
@@ -117,70 +116,83 @@ let charge_niveau nom_fic =
   done;
   Array.of_list !res
 
-let persos_faibles = charge_perso (adresse ^ "\\include\\faibles.txt")
-let persos_moyens = charge_perso (adresse ^ "\\include\\moyens.txt")
-let persos_forts = charge_perso (adresse ^ "\\include\\forts.txt")
-let tab_persos = [|persos_faibles; persos_moyens; persos_forts|]
+let _ = debug "test"
 
-let niveaux_4j = charge_niveau (adresse ^ "\\include\\lvl4j.txt")
-let niveaux_3j = charge_niveau (adresse ^ "\\include\\lvl3j.txt")
-let niveaux_2j = charge_niveau (adresse ^ "\\include\\lvl2j.txt")
-let tab_niveaux = [|niveaux_2j; niveaux_3j; niveaux_4j |]
+let persos_faibles = charge_perso (get_full_path "faibles.txt")
+let persos_moyens  = charge_perso (get_full_path "moyens.txt" )
+let persos_forts   = charge_perso (get_full_path "forts.txt"  )
+let tab_persos = [| persos_faibles; persos_moyens; persos_forts |]
 
-let presentation_pers (a,b) =
-    print_string (
+let _ = debug "test"
+
+let niveaux_4j = charge_niveau (get_full_path "lvl4j.txt")
+let niveaux_3j = charge_niveau (get_full_path "lvl3j.txt")
+let niveaux_2j = charge_niveau (get_full_path "lvl2j.txt")
+let tab_niveaux = [| niveaux_2j; niveaux_3j; niveaux_4j |]
+
+let _ = debug "test"
+
+let pprint_float f = string_of_int (int_of_float (100. *. f))
+
+let presentation_perso (a,b) =
+  let aux b s = if b then " - " ^ s ^ "\n" else "" in
+  let desc =
     a ^ "\n\n" ^
-    "Vitesse  :  " ^ (string_of_int (int_of_float (100. *. b.vit))) ^ "\n" ^
-    "Attaque  :  " ^ (string_of_int (int_of_float (100. *. b.atk))) ^ "\n" ^
-    "Défense  :  " ^ (string_of_int (int_of_float (100. *. b.def))) ^ "\n" ^
-    "Combat spatial  :  " ^ (string_of_int (int_of_float (100. *. b.vol))) ^ "\n" ^
+    "Vitesse  :  "        ^ (pprint_float b.vit) ^ "\n" ^
+    "Attaque  :  "        ^ (pprint_float b.atk) ^ "\n" ^
+    "Défense  :  "        ^ (pprint_float b.def) ^ "\n" ^
+    "Combat spatial  :  " ^ (pprint_float b.vol) ^ "\n" ^
     "Civilisation  :  " ^ (match b.civi with
-        |Neanderthal -> "Moyennageuse"
-        |Fermier -> "Fermière"
-        |Industriel -> "Industrielle"
-        |Riche -> "Riche"
-        |Adaptee -> "Adaptée") ^ "\n" ^
+        | Neanderthal -> "Moyennageuse"
+        | Fermier -> "Fermière"
+        | Industriel -> "Industrielle"
+        | Riche -> "Riche"
+        | Adaptee -> "Adaptée") ^ "\n" ^
     "<<< Bonus >>>\n" ^
-    (if b.terrifiant then " - Terrifiant\n" else "") ^
-    (if b.defenseur then " - Défenseur\n" else "") ^
-    (if b.furtif then " - Furtif\n" else "") ^
-    (if b.dipl_vol then " - Diplomate spatial\n" else "") ^
-    (if b.dipl_atk then " - Diplomate attaquant\n" else "") ^
-    (if b.dipl_def then " - Diplomate defenseur\n" else "") ^
-    (if b.conquerant then " - Conquérant\n" else ""))
+    (aux b.terrifiant "Terrifiant") ^
+    (aux b.defenseur  "Défenseur") ^
+    (aux b.furtif     "Furtif") ^
+    (aux b.dipl_vol   "Diplomate spatial") ^
+    (aux b.dipl_atk   "Diplomate attaquant") ^
+    (aux b.dipl_def   "Diplomate defenseur") ^
+    (aux b.conquerant "Conquérant") in
+  print_string desc
 
 
 let presentation_niveau a b =
-    let (x,_) = tab_niveaux.(a).(b) in
-    print_string x;
-    open_graph "1x1";
-    let (img, (ty,tx)) = get_img_bmp (adresse ^ "\\include\\niveaux/" ^ 
-        (string_of_int a) ^ "x" ^ (string_of_int b) ^ " " ^ x) in
-    close_graph ();
-    open_graph ((string_of_int tx) ^ "x" ^ (string_of_int ty));
-    while key_pressed () do ignore (read_key ()) done;
-    while not (key_pressed ()) do
-        draw_image img 0 0;
-        synchronize () done
-
+  let (x,_) = tab_niveaux.(a).(b) in
+  print_string x;
+  open_graph "1x1";
+  let path = get_path ["niveaux"; (string_of_int a) ^ "x" ^ (string_of_int b) ^ " " ^ x] in
+  let (img, (ty,tx)) = get_img_bmp path in
+  close_graph ();
+  open_graph ((string_of_int tx) ^ "x" ^ (string_of_int ty));
+  while key_pressed () do ignore (read_key ()) done;
+  while not (key_pressed ()) do
+    draw_image img 0 0;
+    synchronize ()
+  done
+  
 let dos s =
-    let i = ref 0 in
-    while s.[!i] <> 'x' do incr i done;
-    int_of_string (String.sub s 0 !i) ,
-    int_of_string (String.sub s (!i+1) (String.length s - !i-1))
+  let i = ref 0 in
+  while s.[!i] <> 'x' do incr i done;
+  int_of_string (String.sub s 0 !i) ,
+  int_of_string (String.sub s (!i+1) (String.length s - !i-1))
 
 let perso_of_string mot =
-    match mot.[0] with
-    |'-' -> if mot.[1] <> '>' then failwith "commencer par '->'"
-        else begin
-            let nom = String.sub mot 2 (String.length mot - 2) in
-            let (a,b) = (nom, (charge_perso (adresse ^ "\\persos/" ^
-                nom ^ ".txt") ).(0)) in
-            b end
-    |_ -> let (a,b) = dos mot in
-        tab_persos.(a).(b)
+  match mot.[0] with
+  | '-' ->
+    if mot.[1] <> '>'
+    then failwith "commencer par '->'"
+    else begin
+      let nom = String.sub mot 2 (String.length mot - 2) in
+      let perso = charge_perso (get_path ["persos"; nom ^ ".txt"]) in
+      let (a,b) = (nom, perso.(0)) in
+      b end
+  | _ -> let (a,b) = dos mot in
+    tab_persos.(a).(b)
 
-let presentation_perso s = presentation_pers (perso_of_string s)
+let presentation_perso_by_name s = presentation_perso (perso_of_string s)
 
 let creer_perso
     ?(conquerant=false)
@@ -208,7 +220,7 @@ let creer_perso
     } in
   let a = equilibrer 1. perso in
   print_endline "personnage créé :"; print_newline ();
-  presentation_pers (nom, a);
+  presentation_perso (nom, a);
   perso_save (adresse ^ "\\persos/" ^ nom ^ ".txt") (nom, a)
 
 
@@ -228,3 +240,4 @@ let jouer ?(controlIA=[|false;false;false|])
         ~ordi:controlIA ()
 
 
+let _ = debug "test"
