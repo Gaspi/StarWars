@@ -32,7 +32,7 @@ let ordi_base : joueur =
     dipl_def=false;conquerant=false;civi=Adaptee
   }
 
-let _ = debug adresse
+let _ = debug "Address: %s\n" adresse
 
 let lit_perso tab =
   let gf () = lit_float tab in
@@ -132,6 +132,13 @@ let tab_niveaux = [| niveaux_2j; niveaux_3j; niveaux_4j |]
 
 let pprint_float f = string_of_int (int_of_float (100. *. f))
 
+let print_civi = function
+  | Neanderthal -> "Moyennageuse"
+  | Fermier     -> "Fermière"
+  | Industriel  -> "Industrielle"
+  | Riche       -> "Riche"
+  | Adaptee     -> "Adaptée"
+
 let print_perso (a,b) =
   let aux b s = if b then " - " ^ s ^ "\n" else "" in
   let desc =
@@ -140,12 +147,7 @@ let print_perso (a,b) =
     "Attaque  :  "        ^ (pprint_float b.atk) ^ "\n" ^
     "Défense  :  "        ^ (pprint_float b.def) ^ "\n" ^
     "Combat spatial  :  " ^ (pprint_float b.vol) ^ "\n" ^
-    "Civilisation  :  " ^ (match b.civi with
-        | Neanderthal -> "Moyennageuse"
-        | Fermier -> "Fermière"
-        | Industriel -> "Industrielle"
-        | Riche -> "Riche"
-        | Adaptee -> "Adaptée") ^ "\n" ^
+    "Civilisation  :  "   ^ (print_civi b.civi) ^ "\n" ^
     "<<< Bonus >>>\n" ^
     (aux b.terrifiant "Terrifiant") ^
     (aux b.defenseur  "Défenseur") ^
@@ -155,14 +157,6 @@ let print_perso (a,b) =
     (aux b.dipl_def   "Diplomate defenseur") ^
     (aux b.conquerant "Conquérant") in
   print_string desc
-
-let print_civi = function
-  | Neanderthal -> "Moyennageuse"
-  | Fermier     -> "Fermière"
-  | Industriel  -> "Industrielle"
-  | Riche       -> "Riche"
-  | Adaptee     -> "Adaptée"
-
 
 let presentation_niveau a b =
   let (x,_) = tab_niveaux.(a).(b) in

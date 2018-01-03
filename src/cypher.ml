@@ -113,6 +113,7 @@ let coder_sauver ?(code=97) ?(decalage=147) ?(graine=(0,0,0)) nom_fic message =
     enregistrer nom_fic (coder ~code:code ~decalage:decalage ~graine:graine message)
 
 let decoder_charger ?(code=97) ?(decalage=147) nom_fic =
+  Basic.debug "gasp %i %i" code decalage;
   let res = decoder ~code:code ~decalage:decalage (charger nom_fic) in
   Basic.debug "gasp";
   res

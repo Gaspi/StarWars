@@ -24,4 +24,4 @@ let rec aff_list = function
 (* Prints the given list.  *)
 
 
-let debug s = Format.printf "Debug: %s@." s
+let debug fmt = Format.printf fmt
