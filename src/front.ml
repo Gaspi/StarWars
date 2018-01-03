@@ -3,10 +3,9 @@ open Basic
 open Png
 open Kernel
 open Cypher
-
 open Graphics
 
-let neutre_base =
+let neutre_base : joueur =
   {
     vit = 1.;
     def=1.1;
@@ -22,7 +21,7 @@ let neutre_base =
     civi=Neanderthal
   }
 
-let ordi_base =
+let ordi_base : joueur =
   {
     vit = 1.1;
     def=1.1;
@@ -130,11 +129,10 @@ let niveaux_3j = charge_niveau (get_full_path "lvl3j.txt")
 let niveaux_2j = charge_niveau (get_full_path "lvl2j.txt")
 let tab_niveaux = [| niveaux_2j; niveaux_3j; niveaux_4j |]
 
-let _ = debug "test"
 
 let pprint_float f = string_of_int (int_of_float (100. *. f))
 
-let presentation_perso (a,b) =
+let print_perso (a,b) =
   let aux b s = if b then " - " ^ s ^ "\n" else "" in
   let desc =
     a ^ "\n\n" ^
@@ -157,6 +155,13 @@ let presentation_perso (a,b) =
     (aux b.dipl_def   "Diplomate defenseur") ^
     (aux b.conquerant "Conquérant") in
   print_string desc
+
+let print_civi = function
+  | Neanderthal -> "Moyennageuse"
+  | Fermier     -> "Fermière"
+  | Industriel  -> "Industrielle"
+  | Riche       -> "Riche"
+  | Adaptee     -> "Adaptée"
 
 
 let presentation_niveau a b =
@@ -181,18 +186,17 @@ let dos s =
 
 let perso_of_string mot =
   match mot.[0] with
-  | '-' ->
-    if mot.[1] <> '>'
-    then failwith "commencer par '->'"
+  | '-' -> if mot.[1] <> '>' then failwith "commencer par '->'"
     else begin
       let nom = String.sub mot 2 (String.length mot - 2) in
       let perso = charge_perso (get_path ["persos"; nom ^ ".txt"]) in
       let (a,b) = (nom, perso.(0)) in
-      b end
-  | _ -> let (a,b) = dos mot in
+      (charge_perso (get_path ["persos"; nom ^ ".txt"]) ).(0)
+    end
+  |_ -> let (a,b) = dos mot in
     tab_persos.(a).(b)
 
-let presentation_perso_by_name s = presentation_perso (perso_of_string s)
+let print_perso_by_name s = print_perso (perso_of_string s)
 
 let creer_perso
     ?(conquerant=false)
@@ -220,7 +224,7 @@ let creer_perso
     } in
   let a = equilibrer 1. perso in
   print_endline "personnage créé :"; print_newline ();
-  presentation_perso (nom, a);
+  print_perso (nom, a);
   perso_save (adresse ^ "\\persos/" ^ nom ^ ".txt") (nom, a)
 
 

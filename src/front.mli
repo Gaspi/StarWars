@@ -5,9 +5,9 @@ open Cypher
 val tab_persos : (string * joueur) array array
 
 val presentation_niveau : int -> int -> unit
-
-val presentation_perso : string * Kernel.joueur -> unit
-val presentation_perso_by_name : string -> unit
+  
+val print_perso_by_name : string -> unit
+val print_perso : string * joueur -> unit
 
 val creer_perso :?conquerant:bool ->
   ?furtif:bool ->
@@ -21,7 +21,6 @@ val creer_perso :?conquerant:bool ->
   defense:float ->
   combat_spatial:float ->
   vitesse:float -> string -> unit
-
 
 val jouer :
   ?controlIA:bool array ->

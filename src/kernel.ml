@@ -38,7 +38,6 @@ let ri = Random.int
 let dist_d (a,b) (c,d) = max (abs (a - c)) (abs (b-d))
 
 
-
 let mat_chemin_of_mat_adj mat_adj =
   let taille = Array.length mat_adj in
   let res = Array.make (taille / 2 + 1) [| [| |] |] in
