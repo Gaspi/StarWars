@@ -8,31 +8,35 @@ open Graphics
 let neutre_base : joueur =
   {
     vit = 1.;
-    def=1.1;
-    atk=1.;
-    vol=1.;
-    terrifiant=false;
-    defenseur = false;
-    furtif=false;
-    dipl_vol=false;
-    dipl_atk = false;
-    dipl_def=false;
-    conquerant=false;
+    def = 1.1;
+    atk = 1.;
+    vol = 1.;
+    terrifiant = false;
+    defenseur  = false;
+    furtif     = false;
+    dipl_vol   = false;
+    dipl_atk   = false;
+    dipl_def   = false;
+    conquerant = false;
     civi=Neanderthal
   }
 
 let ordi_base : joueur =
   {
     vit = 1.1;
-    def=1.1;
-    atk=1.;
-    vol=1.;
-    terrifiant=false;
-    defenseur = true; furtif=false; dipl_vol=false; dipl_atk = false;
-    dipl_def=false;conquerant=false;civi=Adaptee
+    def = 1.1;
+    atk = 1.;
+    vol = 1.;
+    terrifiant = false;
+    defenseur  = true;
+    furtif     = false;
+    dipl_vol   = false;
+    dipl_atk   = false;
+    dipl_def   = false;
+    conquerant = false;
+    civi=Adaptee
   }
 
-let _ = debug "Address: %s\n" adresse
 
 let lit_perso tab =
   let gf () = lit_float tab in
@@ -45,29 +49,52 @@ let lit_perso tab =
         | 3 -> Riche
         | _ -> Adaptee), gb(),gb(),gb(),gb(),gb(),gb(),gb(),
      gf(),gf(),gf(),gf(),lit_string tab) in
-  (nom,
-   {vit =vi; def=d; atk=a; vol=vo; terrifiant=ter; defenseur=def;
-    furtif=fu; dipl_vol=dv; dipl_atk = da; dipl_def=dd;conquerant=conq;
-    civi=civ})
+  let perso =
+    {
+      vit = vi;
+      def = d;
+      atk = a;
+      vol = vo;
+      terrifiant = ter;
+      defenseur  = def;
+      furtif     = fu;
+      dipl_vol   = dv;
+      dipl_atk   = da;
+      dipl_def   = dd;
+      conquerant = conq;
+      civi = civ
+    } in
+  (nom, perso)
+
 
 let charge_perso nom_fic =
-  let tab = (coupe_ligne (decoder_charger nom_fic), ref (-1)) in
-  debug "gasp";
+  let decoded = decoder_charger nom_fic in
+  let cut = coupe_ligne decoded in
+  let tab = (cut, ref (-1)) in
   Array.map (fun () -> lit_perso tab) (Array.make (Array.length (fst tab) / 13) ())
 
 let met_perso (nom,j) l =
   let ps s = l := s::!l in
-  let pf f = l:=(string_of_float f)::!l in
-  let pb b = l:=(string_of_bool b)::!l in
+  let pf f = ps (string_of_float f) in
+  let pb b = ps (string_of_bool  b) in
   ps nom;
-  pf j.vit; pf j.def; pf j.atk; pf j.vol; pb j.terrifiant; pb j.defenseur;
-  pb j.furtif; pb j.dipl_vol; pb j.dipl_atk; pb j.dipl_def; pb j.conquerant;
-  l:=(match j.civi with
+  pf j.vit;
+  pf j.def;
+  pf j.atk;
+  pf j.vol;
+  pb j.terrifiant;
+  pb j.defenseur;
+  pb j.furtif;
+  pb j.dipl_vol;
+  pb j.dipl_atk;
+  pb j.dipl_def;
+  pb j.conquerant;
+  ps (match j.civi with
       | Neanderthal -> "0"
-      | Fermier -> "1"
-      | Industriel -> "2"
-      | Riche -> "3"
-      | Adaptee -> "4")::!l
+      | Fermier     -> "1"
+      | Industriel  -> "2"
+      | Riche       -> "3"
+      | Adaptee     -> "4")
 
 let perso_save nom_fic perso =
   let l = ref [] in
@@ -87,7 +114,7 @@ let maod taille tab =
 let lit_niveau (tab,i) =
   let gi () = lit_int (tab,i) in
   let nom = lit_string (tab,i) in
-  let nb_et = gi() in
+  let nb_et = gi () in
   let tab_et = Array.make nb_et (0,0,0,0,0,0) in
   for j = 0 to nb_et - 1 do
     let (f,e,d,c,b,a) = (gi(),gi(),gi(),gi(),gi(),gi()) in
@@ -106,7 +133,8 @@ let lit_niveau (tab,i) =
   (nom, (tab_et, maod nb_et tab_db, snd neutre,snd j4, tx,ty))
   
 let charge_niveau nom_fic =
-  let tab = (coupe_ligne (decoder_charger nom_fic), ref (-1)) in
+  let decoded = decoder_charger nom_fic in
+  let tab = (coupe_ligne decoded, ref (-1)) in
   let res = ref [] in
   let continue = ref true in
   while !continue do
@@ -115,19 +143,18 @@ let charge_niveau nom_fic =
   done;
   Array.of_list !res
 
-let _ = debug "test"
 
-let persos_faibles = charge_perso (get_full_path "faibles.txt")
-let persos_moyens  = charge_perso (get_full_path "moyens.txt" )
-let persos_forts   = charge_perso (get_full_path "forts.txt"  )
-let tab_persos = [| persos_faibles; persos_moyens; persos_forts |]
-
-let _ = debug "test"
 
 let niveaux_4j = charge_niveau (get_full_path "lvl4j.txt")
 let niveaux_3j = charge_niveau (get_full_path "lvl3j.txt")
 let niveaux_2j = charge_niveau (get_full_path "lvl2j.txt")
 let tab_niveaux = [| niveaux_2j; niveaux_3j; niveaux_4j |]
+
+let persos_forts   = charge_perso (get_full_path "forts.txt"  )
+let persos_faibles = charge_perso (get_full_path "faibles.txt")
+let persos_moyens  = charge_perso (get_full_path "moyens.txt" )
+let tab_persos = [| persos_faibles; persos_moyens; persos_forts |]
+
 
 
 let pprint_float f = string_of_int (int_of_float (100. *. f))
@@ -161,17 +188,17 @@ let print_perso (a,b) =
 let presentation_niveau a b =
   let (x,_) = tab_niveaux.(a).(b) in
   print_string x;
-  open_graph "1x1";
+  open_graph " 1x1";
   let path = get_path ["niveaux"; (string_of_int a) ^ "x" ^ (string_of_int b) ^ " " ^ x] in
   let (img, (ty,tx)) = get_img_bmp path in
   close_graph ();
-  open_graph ((string_of_int tx) ^ "x" ^ (string_of_int ty));
+  open_graph (" " ^ (string_of_int tx) ^ "x" ^ (string_of_int ty));
   while key_pressed () do ignore (read_key ()) done;
   while not (key_pressed ()) do
     draw_image img 0 0;
     synchronize ()
   done
-  
+
 let dos s =
   let i = ref 0 in
   while s.[!i] <> 'x' do incr i done;
@@ -217,7 +244,8 @@ let creer_perso
       civi=civilisation
     } in
   let a = equilibrer 1. perso in
-  print_endline "personnage créé :"; print_newline ();
+  print_endline "personnage créé :";
+  print_newline ();
   print_perso (nom, a);
   perso_save (adresse ^ "\\persos/" ^ nom ^ ".txt") (nom, a)
 
@@ -236,6 +264,3 @@ let jouer ?(controlIA=[|false;false;false|])
         ~control_chiffres:commandes_chiffres
         ~control_souris:commandes_souris
         ~ordi:controlIA ()
-
-
-let _ = debug "test"

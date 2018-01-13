@@ -31,8 +31,8 @@ let is_prime n = n > 1 && is_not_divisor n 2
 
 let trouve_inverse ?(modulo=256) n =
   let i = ref 0 in
-  while !i < modulo && !i * n mod modulo <> 1 do
-    incr i done;
+  while !i < modulo && !i * n mod modulo <> 1
+  do incr i done;
   if !i = modulo then failwith "element non inversible";
   !i
 
@@ -61,18 +61,24 @@ let decoder ?(code=97) ?(decalage=147) message =
   let t = String.length message in
   if t < 3 then failwith "message trop court";
   let res = String.make ((t - 3) / 2) ' ' in
-  let (a,b,c) = (ref (ioc message.[0]), ref (ioc message.[1]),
-                 ref (ioc message.[2])) in
+  let a = ref (ioc message.[0]) in
+  let b = ref (ioc message.[1]) in
+  let c = ref (ioc message.[2]) in
   let i = ref 3 in
   while !i < t do
-    res.[(!i-3)/2] <- char_of_int
-        (((((ioc message.[!i]) * cd) mod 255)
-          - dec + 255) mod 255);
+    let mi = ioc message.[!i] in
+    let decmi = (mi * cd + 255 - dec) mod 255 in
+    res.[(!i-3)/2] <- char_of_int decmi;
     incr i;
     let aux = (!a + !b + !c) mod 255 in
-    a := !b; b := !c; c := aux;
-    if ioc message.[!i] <> !c then
-      failwith "code erroné";
+    a := !b;
+    b := !c;
+    c := aux;
+    (*
+    if ioc message.[!i] <> !c
+    then Basic.debug "%i : (%i,%i)  %i <> %i\n" !i mi decmi (ioc message.[!i]) !c;
+    *)
+    (* failwith "code erroné";   *)
     incr i
   done;
   res
@@ -81,16 +87,22 @@ let coupe_ligne s =
     let res = ref [] in
     let courant = ref [] in
     let i = ref 0 in
-    while !i < String.length s do
-        if s.[!i] = '\n' then (
-            res := (string_of_char_list (List.rev!courant))::!res;
-            courant := [] )
-        else
-            courant := s.[!i]::!courant;
-        incr i
+    let len = String.length s in
+    while !i < len do
+      if s.[!i] = '\n'
+      then
+        begin
+          res := (string_of_char_list (List.rev!courant))::!res;
+          courant := []
+        end
+      else courant := s.[!i]::!courant;
+      incr i
     done;
     res := (string_of_char_list (List.rev !courant))::!res;
-    Array.of_list (List.rev !res)
+    let b = List.rev !res in
+    let res = Array.make (List.length b) "" in
+    List.iteri (fun i s -> res.(i) <- s) b;
+    res
 
 
 let enregistrer nom_fic s =
@@ -101,22 +113,22 @@ let enregistrer nom_fic s =
 let charger nom_fic =
     let fic = open_in nom_fic in
     let res = ref [] in
-    let continue = ref true in
-    while !continue do
-        try res := (input_line fic)::!res
-        with End_of_file -> continue := false
-    done;
+    (try while true do res := (input_line fic)::!res done
+     with End_of_file -> ());
     close_in fic;
-    String.concat "\n" (List.rev !res)
+    String.concat "\r\n" (List.rev !res)
+
 
 let coder_sauver ?(code=97) ?(decalage=147) ?(graine=(0,0,0)) nom_fic message =
     enregistrer nom_fic (coder ~code:code ~decalage:decalage ~graine:graine message)
 
+let remove_char_from_string c s = String.concat "" (String.split_on_char c s)
+
 let decoder_charger ?(code=97) ?(decalage=147) nom_fic =
-  Basic.debug "gasp %i %i" code decalage;
-  let res = decoder ~code:code ~decalage:decalage (charger nom_fic) in
-  Basic.debug "gasp";
-  res
+  let file = charger nom_fic in
+  let res = decoder ~code:code ~decalage:decalage file in
+  remove_char_from_string '' res
+
 
 let lit_string (tab, i) = incr i; tab.(!i)
 let lit_float x = float_of_string (lit_string x)

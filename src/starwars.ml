@@ -2,14 +2,19 @@
 open Kernel
 open Front
 
+
 (* La table des personnages est de dimension 3 * 8. *)
 
 let _ =
   begin
-    print_perso_by_name "->napoléon";
+    
+    (*    print_perso_by_name "->napoléon";*)
+
     print_perso_by_name "2x4";
     
     presentation_niveau 2 1;
+    
+    let _ = exit 1 in
     
     jouer
       ~j1:"->gaspi"
