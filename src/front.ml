@@ -145,14 +145,14 @@ let charge_niveau nom_fic =
 
 
 
-let niveaux_4j = charge_niveau (get_full_path "lvl4j.txt")
-let niveaux_3j = charge_niveau (get_full_path "lvl3j.txt")
-let niveaux_2j = charge_niveau (get_full_path "lvl2j.txt")
+let niveaux_4j = charge_niveau (get_include "lvl4j.txt")
+let niveaux_3j = charge_niveau (get_include "lvl3j.txt")
+let niveaux_2j = charge_niveau (get_include "lvl2j.txt")
 let tab_niveaux = [| niveaux_2j; niveaux_3j; niveaux_4j |]
 
-let persos_forts   = charge_perso (get_full_path "forts.txt"  )
-let persos_faibles = charge_perso (get_full_path "faibles.txt")
-let persos_moyens  = charge_perso (get_full_path "moyens.txt" )
+let persos_forts   = charge_perso (get_include "forts.txt"  )
+let persos_faibles = charge_perso (get_include "faibles.txt")
+let persos_moyens  = charge_perso (get_include "moyens.txt" )
 let tab_persos = [| persos_faibles; persos_moyens; persos_forts |]
 
 
@@ -188,10 +188,13 @@ let print_perso (a,b) =
 let presentation_niveau a b =
   let (x,_) = tab_niveaux.(a).(b) in
   print_string x;
-  open_graph " 1x1";
-  let path = get_path ["niveaux"; (string_of_int a) ^ "x" ^ (string_of_int b) ^ " " ^ x] in
-  let (img, (ty,tx)) = get_img_bmp path in
-  close_graph ();
+  let path = get_level a b in
+  let imgbmp = get_img_bmp path in
+  Basic.debug "Success !!!\n";
+  let _ = exit 1 in
+  let (img, (ty,tx)) = imgbmp in
+  Basic.debug "Success !!!\n";
+  let _ = exit 1 in
   open_graph (" " ^ (string_of_int tx) ^ "x" ^ (string_of_int ty));
   while key_pressed () do ignore (read_key ()) done;
   while not (key_pressed ()) do

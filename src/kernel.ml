@@ -11,13 +11,15 @@ let deltay = 0
 
 let (boom_img1, boom_img2, boom_img3) =
   begin
+    let b1 = fst (get_img_bmp (get_include "boom1")) in
+    let b2 = fst (get_img_bmp (get_include "boom2")) in
+    let b3 = fst (get_img_bmp (get_include "boom3")) in
     open_graph " 1x1";
-    let res = (
-      set_color_transp black (fst (get_img_bmp (get_full_path "boom1"))),
-      set_color_transp black (fst (get_img_bmp (get_full_path "boom2"))),
-      set_color_transp black (fst (get_img_bmp (get_full_path "boom3"))) ) in
+    let tb1 = set_color_transp black b1 in
+    let tb2 = set_color_transp black b2 in
+    let tb3 = set_color_transp black b3 in
     close_graph ();
-    res
+    (tb1, tb2, tb3)
   end
 
 

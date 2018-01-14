@@ -3,19 +3,33 @@ open Graphics
 
 let rec int_of_bytes = function
   | []   -> 0
-  | t::q -> t + 256 * int_of_bytes q;;
+  | t::q -> t + 256 * int_of_bytes q
 (*convertit une liste de bytes en sa valeur entière correspondante*)
 
-let rec get_bytes fichier = function
+let rec get_bytes file = function
   | 0 -> 0
-  | n -> let a = input_byte fichier in
-    a + 256 * (get_bytes fichier (n-1));;
+  | n -> let a = input_byte file in
+    a + 256 * (get_bytes file (n-1))
 (* lit n bytes d'un fichier et renvoie la valeur entière correspondante *)
 
-let get_mat_bmp nom_fichier =
-  let fic = open_in
-      (if String.sub nom_fichier (String.length nom_fichier - 4) 4 = ".bmp" then
-      nom_fichier else nom_fichier ^ ".bmp") in
+let get_rgb file =
+  try
+    let r = input_byte file in
+    let g = input_byte file in
+    let b = input_byte file in
+    (*    Basic.debug "%i %i %i" r g b;*)
+    (r,g,b)
+  with End_of_file -> (Basic.debug " Test\n"; exit 1)
+(*       | Graphic_failure _ -> (Basic.debug "Graphics failure\n"; exit 1) *)
+
+let get_bmp_path path =
+  if String.sub path (String.length path - 4) 4 = ".bmp"
+  then path else path ^ ".bmp"
+
+
+let get_mat_bmp path =
+  Basic.debug "\nget_map %s\n" (get_bmp_path path);
+  let fic = open_in_bin (get_bmp_path path) in
   (* ouverture du fichier, rajoute eventuellement le .bmp manquant *)
   let getb = get_bytes fic in
   (* getb -> lit dans le fichier ouvert n bytes *)
@@ -31,39 +45,54 @@ let get_mat_bmp nom_fichier =
   (* nb de bits pour coder une couleur *)
   if getb 4 <> 0 then failwith "compression"; (*mode de compression *)
   seek_in fic start; (* on se déplace au début de l'image *)
-  let resultat = Array.make_matrix hauteur largeur (rgb 0 0 0) in
+  let resultat = Array.make_matrix hauteur largeur (0,0,0) in
   let decalage = (8 - ((3 * largeur) mod 4)) mod 4 in
   (* calcul du décalage, nb de bts ajouté à chaque ligne pour que sa
      longueur soit un multiple de 4*)
-  for i = hauteur - 1 downto 0 do
-    for j = 0 to largeur - 1 do
-   try
-     resultat.(i).(j) <- rgb (input_byte fic)
-      (input_byte fic) (input_byte fic)
-   with _ -> close_in fic done;
- ignore (getb decalage)
-    done;
-    (*lecture de l'image -> souvent ici qu'il y a des bugs *)
-    close_in fic;
-    (* fermeture du fichier *)
-    (resultat, (hauteur, largeur));;
+  begin
+    try
+      for i = 0 to hauteur-1 do
+        for j = 0 to largeur-1 do
+          resultat.(i).(j) <- get_rgb fic;
+          let (r,g,b) = resultat.(i).(j) in
+          Basic.debug "%i x %i : (%i, %i, %i)\n" i j r g b
+        done;
+        ignore(getb decalage)
+      done;
+    with End_of_file as e -> (close_in fic; raise e)
+  end;
+  if hauteur > 50 then exit 1;
+  (*lecture de l'image -> souvent ici qu'il y a des bugs *)
+  let _ = close_in fic in  (* fermeture du fichier *)
+  (resultat, (hauteur, largeur))
+(** A partir de l'adresse complète d'un fichier, renvoie la matrice des couleurs de l'image
+    bmp et ses dimensions. *)
 
-(*
-A partir de l'adresse complète d'un fichier, renvoie la matrice des couleurs de l'image
-bmp et ses dimensions.
-*)
 
-let get_img_bmp fic =
-  let (a,b) = get_mat_bmp fic in
-  (make_image a, b)
+let get_img_bmp path =
+  Basic.debug "get_img_bmp %s" path;
+  let (bmap,(h,l)) = get_mat_bmp path in
+  open_graph " 1x1";
+  let rgbmap = Array.make_matrix h l (rgb 0 0 0) in
+  for i = 0 to h-1 do
+    for j = 0 to l-1 do
+      let (r,g,b) = bmap.(i).(j) in
+      rgbmap.(h-i-1).(j) <- rgb r g b
+    done
+  done;
+  let bitmap = make_image rgbmap in
+  close_graph ();
+  (bitmap, (h,l))
 (* lit le fichier et renvoie l'image correspondante *)
 
-let set_color_transp couleur imag =
-  let mat = dump_image imag in
+let set_color_transp couleur img =
+  let mat = dump_image img in
   for i = 0 to Array.length mat - 1 do
     for j = 0 to Array.length mat.(0) - 1 do
-   if mat.(i).(j) = couleur then
-     mat.(i).(j) <- transp done done;
+      if mat.(i).(j) = couleur
+      then mat.(i).(j) <- transp
+    done
+  done;
   make_image mat
 (* transforme tout les occurences de "couleur" dans la matrice de couleurs "imag"
    par la couleur transp (transparence) *)

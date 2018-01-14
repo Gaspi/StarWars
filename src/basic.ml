@@ -7,10 +7,14 @@ let separator =
   else if Sys.win32 then "\\"
   else "\\"
 
-let get_path names =
-  List.fold_left (fun s p -> s ^ separator ^ p) adresse names
+let build_path names = String.concat separator names
 
-let get_full_path name = get_path ["include"; name]
+let get_path names = build_path (adresse::names)
+
+let get_include name = get_path ["include"; name]
+
+let get_level a b =
+  get_path ["include"; "niveaux"; (string_of_int a) ^ "x" ^ (string_of_int b) ^ ".bmp"]
 
 
 let rec aff_list = function

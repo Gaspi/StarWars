@@ -41,26 +41,31 @@ let coder ?(code=97) ?(decalage=147) ?(graine=(0,0,0)) message =
     let t = String.length message in
     let cd = if is_prime code then code else 97 in
     let dec = decalage mod 255 in
-    let (gr0, gr1, gr2) = if graine = (0,0,0) then
-            (Random.int 255, Random.int 255, Random.int 255)
-        else graine in
-    let res = String.make (2*t+3) ' ' in
-    res.[0] <- coi gr0; res.[1] <- coi gr1; res.[2] <- coi gr2;
+    let (gr0, gr1, gr2) =
+      if graine = (0,0,0)
+      then (Random.int 255, Random.int 255, Random.int 255)
+      else graine in
+    let length = 2*t+3 in
+    let res = Array.make length ' ' in
+    res.(0) <- coi gr0;
+    res.(1) <- coi gr1;
+    res.(2) <- coi gr2;
     let a,b,c = ref gr0, ref gr1, ref gr2 in
     for i = 0 to String.length message - 1 do
-        res.[2*i+3] <- coi ((int_of_char message.[i] + dec) * cd);
-        let aux = (!a + !b + !c) mod 255 in
-        res.[2*i+4] <- coi aux;
-        a := !b; b := !c; c := aux;
+      res.(2*i+3) <- coi ((int_of_char message.[i] + dec) * cd);
+      let aux = (!a + !b + !c) mod 255 in
+      res.(2*i+4) <- coi aux;
+      a := !b; b := !c; c := aux;
     done;
-    res
+    String.init length (fun i -> res.(i))
 
 let decoder ?(code=97) ?(decalage=147) message =
   let cd = trouve_inverse ~modulo:255 (code mod 255) in
   let dec = decalage mod 255 in
   let t = String.length message in
   if t < 3 then failwith "message trop court";
-  let res = String.make ((t - 3) / 2) ' ' in
+  let length = (t - 3) / 2 in
+  let res = Array.make length ' ' in
   let a = ref (ioc message.[0]) in
   let b = ref (ioc message.[1]) in
   let c = ref (ioc message.[2]) in
@@ -68,7 +73,7 @@ let decoder ?(code=97) ?(decalage=147) message =
   while !i < t do
     let mi = ioc message.[!i] in
     let decmi = (mi * cd + 255 - dec) mod 255 in
-    res.[(!i-3)/2] <- char_of_int decmi;
+    res.((!i-3)/2) <- char_of_int decmi;
     incr i;
     let aux = (!a + !b + !c) mod 255 in
     a := !b;
@@ -81,7 +86,7 @@ let decoder ?(code=97) ?(decalage=147) message =
     (* failwith "code erroné";   *)
     incr i
   done;
-  res
+  String.init length (fun i -> res.(i))
 
 let coupe_ligne s =
     let res = ref [] in
@@ -122,7 +127,17 @@ let charger nom_fic =
 let coder_sauver ?(code=97) ?(decalage=147) ?(graine=(0,0,0)) nom_fic message =
     enregistrer nom_fic (coder ~code:code ~decalage:decalage ~graine:graine message)
 
-let remove_char_from_string c s = String.concat "" (String.split_on_char c s)
+let remove_char_from_string ch str =
+  let l = ref [] in
+  for i = 0 to String.length str - 1 do
+    let c = str.[i] in
+    if c <> ch then l := c :: !l
+  done;
+  let get_next i =
+    let hd = List.hd !l in
+    l := List.tl !l;
+    hd in
+  String.init (List.length!l) get_next
 
 let decoder_charger ?(code=97) ?(decalage=147) nom_fic =
   let file = charger nom_fic in
