@@ -1,3 +1,6 @@
+
+open Graphics
+
 (*
 Module permettant de traiter (la plupart) des fichiers BMP au format 24 bits non compressés.
 Pour convertir une image sous ce format : paint -> enregistrer sous puis dans format
@@ -13,10 +16,10 @@ http://www.commentcamarche.net/contents/video/format-bmp.php3
 *)
 
 
-val get_img_bmp : string -> Graphics.image * (int * int)
+val get_img_bmp : string -> image * (int * int)
 (* Lit le fichier et renvoie l'image correspondante *)
 
-val set_color_transp : Graphics.color -> Graphics.image -> Graphics.image
-(* Transforme tout les occurences de "couleur" dans la matrice de couleurs "imag"
+val set_color_transp : color -> image -> image
+(* Transforme tout les occurences de "couleur" dans la matrice de couleurs
    par la couleur transp (transparence) *)
 

@@ -1,4 +1,3 @@
-
 open Basic
 open Graphics
 open Png
@@ -11,10 +10,11 @@ let deltay = 0
 
 let (boom_img1, boom_img2, boom_img3) =
   begin
+    open_graph " 1x1";
     let b1 = fst (get_img_bmp (get_include "boom1")) in
     let b2 = fst (get_img_bmp (get_include "boom2")) in
     let b3 = fst (get_img_bmp (get_include "boom3")) in
-    open_graph " 1x1";
+    let mat = dump_image b1 in
     let tb1 = set_color_transp black b1 in
     let tb2 = set_color_transp black b2 in
     let tb3 = set_color_transp black b3 in

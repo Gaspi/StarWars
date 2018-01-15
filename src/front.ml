@@ -71,7 +71,8 @@ let charge_perso nom_fic =
   let decoded = decoder_charger nom_fic in
   let cut = coupe_ligne decoded in
   let tab = (cut, ref (-1)) in
-  Array.map (fun () -> lit_perso tab) (Array.make (Array.length (fst tab) / 13) ())
+  let nb_persos = Array.length (fst tab) / 13 in
+  Array.init nb_persos (fun i -> lit_perso tab)
 
 let met_perso (nom,j) l =
   let ps s = l := s::!l in
@@ -189,7 +190,10 @@ let presentation_niveau a b =
   let (x,_) = tab_niveaux.(a).(b) in
   print_string x;
   let path = get_level a b in
+  
+  open_graph (" 1x1");
   let imgbmp = get_img_bmp path in
+  close_graph ();
   Basic.debug "Success !!!\n";
   let _ = exit 1 in
   let (img, (ty,tx)) = imgbmp in

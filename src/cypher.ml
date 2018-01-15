@@ -86,7 +86,7 @@ let decoder ?(code=97) ?(decalage=147) message =
     (* failwith "code erroné";   *)
     incr i
   done;
-  String.init length (fun i -> res.(i))
+  String.init length (fun i -> res.(length - 1 - i))
 
 let coupe_ligne s =
     let res = ref [] in
@@ -146,6 +146,7 @@ let decoder_charger ?(code=97) ?(decalage=147) nom_fic =
 
 
 let lit_string (tab, i) = incr i; tab.(!i)
-let lit_float x = float_of_string (lit_string x)
+let lit_float x = try float_of_string (lit_string x)
+  with _ -> (Basic.debug "test %s" (lit_string x); assert false)
 let lit_int   x = int_of_string (lit_string x)
 let lit_bool  x = bool_of_string (lit_string x)

@@ -1,4 +1,3 @@
-
 open Graphics
 
 let rec int_of_bytes = function
@@ -72,7 +71,7 @@ let get_mat_bmp path =
 let get_img_bmp path =
   Basic.debug "get_img_bmp %s" path;
   let (bmap,(h,l)) = get_mat_bmp path in
-  open_graph " 1x1";
+  (*   open_graph " 1x1"; *)
   let rgbmap = Array.make_matrix h l (rgb 0 0 0) in
   for i = 0 to h-1 do
     for j = 0 to l-1 do
@@ -81,7 +80,8 @@ let get_img_bmp path =
     done
   done;
   let bitmap = make_image rgbmap in
-  close_graph ();
+  let _ = dump_image bitmap in
+  (*  close_graph (); *)
   (bitmap, (h,l))
 (* lit le fichier et renvoie l'image correspondante *)
 
