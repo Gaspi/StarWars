@@ -19,7 +19,7 @@ let get_rgb file =
     (*    Basic.debug "%i %i %i" r g b;*)
     (r,g,b)
   with End_of_file -> (Basic.debug " Test\n"; exit 1)
-(*       | Graphic_failure _ -> (Basic.debug "Graphics failure\n"; exit 1) *)
+     | Graphic_failure _ -> (Basic.debug "Graphics failure\n"; exit 1)
 
 let get_bmp_path path =
   if String.sub path (String.length path - 4) 4 = ".bmp"
@@ -52,13 +52,17 @@ let get_mat_bmp path =
     try
       for i = 0 to hauteur-1 do
         for j = 0 to largeur-1 do
-          resultat.(i).(j) <- get_rgb fic;
-          let (r,g,b) = resultat.(i).(j) in
-          Basic.debug "%i x %i : (%i, %i, %i)\n" i j r g b
+          try
+            resultat.(i).(j) <- get_rgb fic;
+          with
+          | _ -> (Basic.debug "test3\n"; exit 2);
+            let (r,g,b) = resultat.(i).(j) in
+            Basic.debug "%i x %i : (%i, %i, %i)\n" i j r g b
         done;
         ignore(getb decalage)
       done;
     with End_of_file as e -> (close_in fic; raise e)
+       | _ -> (Basic.debug "test2"; exit 2)
   end;
   if hauteur > 50 then exit 1;
   (*lecture de l'image -> souvent ici qu'il y a des bugs *)

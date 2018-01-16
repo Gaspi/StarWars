@@ -190,7 +190,7 @@ let presentation_niveau a b =
   let (x,_) = tab_niveaux.(a).(b) in
   print_string x;
   let path = get_level a b in
-  
+  Basic.debug "path : %s" path;
   open_graph (" 1x1");
   let imgbmp = get_img_bmp path in
   close_graph ();

@@ -11,11 +11,14 @@ let _ =
     (*    print_perso_by_name "->napoléon";*)
 
     print_perso_by_name "2x4";
-    
-    presentation_niveau 2 1;
-    
-    let _ = exit 1 in
-    
+    try
+      presentation_niveau 2 1; (**)
+    with
+    | _ -> exit 1;
+
+    exit 1
+    (*
+
     jouer
       ~j1:"->gaspi"
       ~j2:"0x0"
@@ -58,5 +61,6 @@ let _ =
       done in
     
     affiche_colonne_perso 1
+*)
   end
          
