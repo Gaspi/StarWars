@@ -16,10 +16,8 @@ let get_rgb file =
     let r = input_byte file in
     let g = input_byte file in
     let b = input_byte file in
-    (*    Basic.debug "%i %i %i" r g b;*)
     (r,g,b)
-  with End_of_file -> (Basic.debug " Test\n"; exit 1)
-     | Graphic_failure _ -> (Basic.debug "Graphics failure\n"; exit 1)
+  with End_of_file -> (Basic.debug "Unexpected EoF encountered !\n"; exit 1)
 
 let get_bmp_path path =
   if String.sub path (String.length path - 4) 4 = ".bmp"
@@ -27,7 +25,6 @@ let get_bmp_path path =
 
 
 let get_mat_bmp path =
-  Basic.debug "\nget_map %s\n" (get_bmp_path path);
   let fic = open_in_bin (get_bmp_path path) in
   (* ouverture du fichier, rajoute eventuellement le .bmp manquant *)
   let getb = get_bytes fic in
@@ -52,19 +49,13 @@ let get_mat_bmp path =
     try
       for i = 0 to hauteur-1 do
         for j = 0 to largeur-1 do
-          try
-            resultat.(i).(j) <- get_rgb fic;
-          with
-          | _ -> (Basic.debug "test3\n"; exit 2);
-            let (r,g,b) = resultat.(i).(j) in
-            Basic.debug "%i x %i : (%i, %i, %i)\n" i j r g b
+          resultat.(i).(j) <- get_rgb fic;
         done;
         ignore(getb decalage)
       done;
     with End_of_file as e -> (close_in fic; raise e)
        | _ -> (Basic.debug "test2"; exit 2)
   end;
-  if hauteur > 50 then exit 1;
   (*lecture de l'image -> souvent ici qu'il y a des bugs *)
   let _ = close_in fic in  (* fermeture du fichier *)
   (resultat, (hauteur, largeur))
@@ -73,9 +64,8 @@ let get_mat_bmp path =
 
 
 let get_img_bmp path =
-  Basic.debug "get_img_bmp %s" path;
-  let (bmap,(h,l)) = get_mat_bmp path in
-  (*   open_graph " 1x1"; *)
+  let (bmap,dim) = get_mat_bmp path in
+  let (h,l) = dim in
   let rgbmap = Array.make_matrix h l (rgb 0 0 0) in
   for i = 0 to h-1 do
     for j = 0 to l-1 do
@@ -83,10 +73,7 @@ let get_img_bmp path =
       rgbmap.(h-i-1).(j) <- rgb r g b
     done
   done;
-  let bitmap = make_image rgbmap in
-  let _ = dump_image bitmap in
-  (*  close_graph (); *)
-  (bitmap, (h,l))
+  (make_image rgbmap, dim)
 (* lit le fichier et renvoie l'image correspondante *)
 
 let set_color_transp couleur img =

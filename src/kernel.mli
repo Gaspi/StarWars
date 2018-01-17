@@ -1,6 +1,12 @@
 
 type culture = Neanderthal | Fermier | Industriel | Riche | Adaptee
 
+val code_civi : culture -> int
+
+val decode_civi : int -> culture
+
+val print_civi : culture -> string
+
 type joueur =
   {
     vit:float;
@@ -51,6 +57,10 @@ type niveau = (int * int * int * int * int * int) array *
     bool array array * joueur * joueur * int * int
 
 val equilibrer : float -> joueur -> joueur
+
+val init : unit -> unit
+
+val terminate : unit -> unit
 
 val jeu :
   ?temps_paye:float ->

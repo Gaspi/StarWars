@@ -37,18 +37,14 @@ let ordi_base : joueur =
     civi=Adaptee
   }
 
-
 let lit_perso tab =
   let gf () = lit_float tab in
   let gb () = lit_bool tab in
-  let (civ,conq,dd,da,dv,fu,def,ter,vo,a,d,vi,nom) =
-    ((match lit_int tab with
-        | 0 -> Neanderthal
-        | 1 -> Fermier
-        | 2 -> Industriel
-        | 3 -> Riche
-        | _ -> Adaptee), gb(),gb(),gb(),gb(),gb(),gb(),gb(),
-     gf(),gf(),gf(),gf(),lit_string tab) in
+  let nom = lit_string tab in
+  let (conq,dd,da,dv,fu,def,ter,vo,a,d,vi) =
+    (gb(),gb(),gb(),gb(),gb(),gb(),gb(),
+     gf(),gf(),gf(),gf()) in
+  let civ = decode_civi (lit_int tab) in
   let perso =
     {
       vit = vi;
@@ -90,12 +86,7 @@ let met_perso (nom,j) l =
   pb j.dipl_atk;
   pb j.dipl_def;
   pb j.conquerant;
-  ps (match j.civi with
-      | Neanderthal -> "0"
-      | Fermier     -> "1"
-      | Industriel  -> "2"
-      | Riche       -> "3"
-      | Adaptee     -> "4")
+  ps (string_of_int (code_civi j.civi))
 
 let perso_save nom_fic perso =
   let l = ref [] in
@@ -157,15 +148,7 @@ let persos_moyens  = charge_perso (get_include "moyens.txt" )
 let tab_persos = [| persos_faibles; persos_moyens; persos_forts |]
 
 
-
 let pprint_float f = string_of_int (int_of_float (100. *. f))
-
-let print_civi = function
-  | Neanderthal -> "Moyennageuse"
-  | Fermier     -> "Fermière"
-  | Industriel  -> "Industrielle"
-  | Riche       -> "Riche"
-  | Adaptee     -> "Adaptée"
 
 let print_perso (a,b) =
   let aux b s = if b then " - " ^ s ^ "\n" else "" in
@@ -193,13 +176,8 @@ let presentation_niveau a b =
   Basic.debug "path : %s" path;
   open_graph (" 1x1");
   let imgbmp = get_img_bmp path in
-  close_graph ();
-  Basic.debug "Success !!!\n";
-  let _ = exit 1 in
   let (img, (ty,tx)) = imgbmp in
-  Basic.debug "Success !!!\n";
-  let _ = exit 1 in
-  open_graph (" " ^ (string_of_int tx) ^ "x" ^ (string_of_int ty));
+  resize_window tx ty;
   while key_pressed () do ignore (read_key ()) done;
   while not (key_pressed ()) do
     draw_image img 0 0;
@@ -213,16 +191,15 @@ let dos s =
   int_of_string (String.sub s (!i+1) (String.length s - !i-1))
 
 let perso_of_string mot =
-  match mot.[0] with
-  | '-' -> if mot.[1] <> '>' then failwith "commencer par '->'"
+  if mot.[0] == '-'
+  then
+    if mot.[1] <> '>' then failwith "commencer par '->'"
     else begin
       let nom = String.sub mot 2 (String.length mot - 2) in
       let perso = charge_perso (get_path ["persos"; nom ^ ".txt"]) in
-      let (a,b) = (nom, perso.(0)) in
-      (charge_perso (get_path ["persos"; nom ^ ".txt"]) ).(0)
+      perso.(0)
     end
-  |_ -> let (a,b) = dos mot in
-    tab_persos.(a).(b)
+  else let (a,b) = dos mot in tab_persos.(a).(b)
 
 let print_perso_by_name s = print_perso (perso_of_string s)
 
@@ -251,10 +228,9 @@ let creer_perso
       civi=civilisation
     } in
   let a = equilibrer 1. perso in
-  print_endline "personnage créé :";
-  print_newline ();
+  Basic.debug "New character created (%s) :\n\n" nom;
   print_perso (nom, a);
-  perso_save (adresse ^ "\\persos/" ^ nom ^ ".txt") (nom, a)
+  perso_save (get_persos (nom ^ ".txt")) (nom, a)
 
 
 let jouer ?(controlIA=[|false;false;false|])

@@ -3,23 +3,49 @@ open Graphics
 open Png
 
 
+type culture = Neanderthal | Fermier | Industriel | Riche | Adaptee
+
+let code_civi = function
+  | Neanderthal -> 0
+  | Fermier     -> 1
+  | Industriel  -> 2
+  | Riche       -> 3
+  | Adaptee     -> 4
+
+let decode_civi = function
+  | 0 -> Neanderthal
+  | 1 -> Fermier
+  | 2 -> Industriel
+  | 3 -> Riche
+  | _ -> Adaptee
+
+let print_civi = function
+  | Neanderthal -> "Moyennageuse"
+  | Fermier     -> "Fermière"
+  | Industriel  -> "Industrielle"
+  | Riche       -> "Riche"
+  | Adaptee     -> "Adaptée"
+
 (* code du jeu *)
+
+let init () =
+  open_graph " 1x1"
+
+let terminate () =
+  close_graph ()
+
 
 
 let deltay = 0
 
-let (boom_img1, boom_img2, boom_img3) =
-  begin
-    open_graph " 1x1";
-    let b1 = fst (get_img_bmp (get_include "boom1")) in
-    let b2 = fst (get_img_bmp (get_include "boom2")) in
-    let b3 = fst (get_img_bmp (get_include "boom3")) in
-    let tb1 = set_color_transp black b1 in
-    let tb2 = set_color_transp black b2 in
-    let tb3 = set_color_transp black b3 in
-    close_graph ();
-    (tb1, tb2, tb3)
-  end
+let load_sprites () =
+  let b1 = fst (get_img_bmp (get_include "boom1")) in
+  let b2 = fst (get_img_bmp (get_include "boom2")) in
+  let b3 = fst (get_img_bmp (get_include "boom3")) in
+  let tb1 = set_color_transp black b1 in
+  let tb2 = set_color_transp black b2 in
+  let tb3 = set_color_transp black b3 in
+  (tb1, tb2, tb3)
 
 
 (* paramètres : *)
@@ -63,8 +89,6 @@ let mat_chemin_of_mat_adj mat_adj =
   done;
   res
 
-
-type culture = Neanderthal | Fermier | Industriel | Riche | Adaptee
 
 type joueur =
   {
@@ -166,7 +190,9 @@ let jeu ?(temps_paye=16.) ?(nbet=0.005) ?(vitess=1.) ?(control_lettres=1)
   let vitesse = ref (0.15 /. vitess) in
   Random.self_init ();
   (* constantes utiles *)
-  let (tab_univers, mat_adj, neutre, j4bis,taillex,tailley) = niveau in
+  let (tab_univers, mat_adj, neutre, j4bis, taillex, tailley) = niveau in
+
+  
   let j4 = equilibrer force_ordi j4bis in
   let taille = Array.length tab_univers in
   let mat_chemin = mat_chemin_of_mat_adj mat_adj in
@@ -177,13 +203,14 @@ let jeu ?(temps_paye=16.) ?(nbet=0.005) ?(vitess=1.) ?(control_lettres=1)
       res.(i) <- {x=x;y=y;r=r;prod=prod;num=i;control=c;pop=pop}
     done; res in
   let j = [|neutre;j1;j2;j3;j4|] in
-  let touches1 = Array.make taille 'a' in
-  let touches2 = Array.make taille 'a' in
-  for i = 0 to taille - 1 do
-    touches1.(i)<- touches_j1.(i);
-    touches2.(i)<- touches_j2.(i)
-  done;
+
+  if taille > Array.length touches_j1 || taille > Array.length touches_j2
+  then failwith "Map too big, not enough control defined.";
+  let touches1 = Array.sub touches_j1 0 taille in
+  let touches2 = Array.sub touches_j2 0 taille in
+  
   let grey = rgb 200 200 200 in
+  
   let tab_aretes =
     let res = Array.make_matrix taille taille Rien in
     for i = 0 to taille - 1 do
@@ -210,17 +237,21 @@ let jeu ?(temps_paye=16.) ?(nbet=0.005) ?(vitess=1.) ?(control_lettres=1)
       | (x,y,t)::q ->
         if t <= 0 then aux q else (x,y,t-1)::(aux q) in
     evenements := aux !evenements in
+
+  resize_window taillex (tailley+deltay);
   
+  (* Explosion sprites *)
+  let (boom_img1, boom_img2, boom_img3) = load_sprites () in
+
+  (* Printing explosion sprites *)
   let aff_evenements () =
-    let rec aux = function
-      | [] -> ()
-      | (x,y,t)::q ->
-        draw_image (
-          if      t >= 50 then boom_img1
-          else if t >= 30 then boom_img2
-          else boom_img3) (x - 25) (y - 25);
-        aux q in
-    aux !evenements in
+    let rec aux (x,y,t) =
+      draw_image (
+        if      t >= 50 then boom_img1
+        else if t >= 30 then boom_img2
+        else boom_img3) (x - 25) (y - 25)
+    in
+    List.iter aux !evenements in
   
   (* fonctions utiles *)
   let sous_reserve_dipl_atk degats nbj=
@@ -480,7 +511,6 @@ let jeu ?(temps_paye=16.) ?(nbet=0.005) ?(vitess=1.) ?(control_lettres=1)
     end
   in
   
-  open_graph (" " ^ (string_of_int taillex) ^ "x" ^ (string_of_int (tailley+deltay)));
   begin
     let t0 = Sys.time () in
     while Sys.time () -. t0 < 0.5 do
@@ -614,7 +644,5 @@ let jeu ?(temps_paye=16.) ?(nbet=0.005) ?(vitess=1.) ?(control_lettres=1)
     then (actu_univers ();
           chrono_actu := !chrono_actu +. !vitesse)
   done;
-  close_graph ()
-
 
 end
