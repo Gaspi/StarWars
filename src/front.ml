@@ -66,13 +66,15 @@ let lit_perso tab =
 let charge_perso nom_fic =
   let decoded = decoder_charger nom_fic in
   let cut = coupe_ligne decoded in
-  let tab = (cut, ref (-1)) in
-  let nb_persos = Array.length (fst tab) / 13 in
-  Array.init nb_persos (fun i -> lit_perso tab)
+  let nb_persos = Array.length cut / 13 in
+  Basic.debug "Test1: %i\n" (Array.length cut);
+  Basic.debug "Test2: %i\n" nb_persos;
+  Basic.debug "Test 3\n%s" (String.concat "\n" (Array.to_list cut));
+  Array.init nb_persos (fun i -> lit_perso (cut, ref (-1)) )
 
 let met_perso (nom,j) l =
   let ps s = l := s::!l in
-  let pf f = ps (string_of_float f) in
+  let pf f = (Basic.debug "sof: %s\n" (string_of_float f); ps (string_of_float f)) in
   let pb b = ps (string_of_bool  b) in
   ps nom;
   pf j.vit;
@@ -91,7 +93,8 @@ let met_perso (nom,j) l =
 let perso_save nom_fic perso =
   let l = ref [] in
   met_perso perso l;
-  coder_sauver nom_fic (String.concat "\n" (List.rev !l))
+  Basic.debug "%s" (String.concat "\r\n" (List.rev !l));
+  coder_sauver nom_fic (String.concat "\r\n" (List.rev !l))
 
 let maod taille tab =
   let res = Array.make_matrix taille taille false in
@@ -174,14 +177,13 @@ let presentation_niveau a b =
   print_string x;
   let path = get_level a b in
   Basic.debug "path : %s" path;
-  open_graph (" 1x1");
   let imgbmp = get_img_bmp path in
   let (img, (ty,tx)) = imgbmp in
   resize_window tx ty;
   while key_pressed () do ignore (read_key ()) done;
   while not (key_pressed ()) do
     draw_image img 0 0;
-    synchronize ()
+    synchronize ();
   done
 
 let dos s =
@@ -197,9 +199,14 @@ let perso_of_string mot =
     else begin
       let nom = String.sub mot 2 (String.length mot - 2) in
       let perso = charge_perso (get_path ["persos"; nom ^ ".txt"]) in
+      if Array.length perso == 0
+      then failwith ("Wrong character string: " ^ mot);
       perso.(0)
     end
-  else let (a,b) = dos mot in tab_persos.(a).(b)
+  else
+    let (a,b) = dos mot in
+    try tab_persos.(a).(b)
+    with Invalid_argument _ -> failwith ("Wrong character string: " ^ mot)
 
 let print_perso_by_name s = print_perso (perso_of_string s)
 
@@ -234,16 +241,25 @@ let creer_perso
 
 
 let jouer ?(controlIA=[|false;false;false|])
-    ?(commandes_lettres=1) ?(commandes_chiffres=2)
-    ?(commandes_souris=3) ?(force_j1=0.) ?(force_j2=0.) ?(force_j3=0.)
+    ?(commandes_lettres=1)
+    ?(commandes_chiffres=2)
+    ?(commandes_souris=3)
+    ?(force_j1=0.)
+    ?(force_j2=0.)
+    ?(force_j3=0.)
     ?(force_ordi_j4=0.) ~j1 ~j2 ~j3 niveau =
-    let niv1, niv2 = dos niveau in
-    jeu ~niveau:(snd tab_niveaux.(niv1).(niv2))
-        ~j1:(equilibrer force_j1 (snd (perso_of_string j1)))
-        ~j2:(equilibrer force_j2 (snd (perso_of_string j2)))
-        ~j3:(equilibrer force_j3 (snd (perso_of_string j3)))
-        ~force_ordi:force_ordi_j4
-        ~control_lettres:commandes_lettres
-        ~control_chiffres:commandes_chiffres
-        ~control_souris:commandes_souris
-        ~ordi:controlIA ()
+  let niv1, niv2 = dos niveau in
+  let niveau = tab_niveaux.(niv1).(niv2) in
+  let j1 = equilibrer force_j1 (snd (perso_of_string j1)) in
+  let j2 = equilibrer force_j2 (snd (perso_of_string j2)) in
+  let j3 = equilibrer force_j3 (snd (perso_of_string j3)) in
+  jeu
+    ~niveau:(snd niveau)
+    ~j1:(j1)
+    ~j2:(j2)
+    ~j3:(j3)
+    ~force_ordi:force_ordi_j4
+    ~control_lettres:commandes_lettres
+    ~control_chiffres:commandes_chiffres
+    ~control_souris:commandes_souris
+    ~ordi:controlIA ()
