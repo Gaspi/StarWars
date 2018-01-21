@@ -193,6 +193,7 @@ let dos s =
   int_of_string (String.sub s (!i+1) (String.length s - !i-1))
 
 let perso_of_string mot =
+  debug "Mot: %s\n" mot;
   if mot.[0] == '-'
   then
     if mot.[1] <> '>' then failwith "commencer par '->'"
@@ -240,7 +241,8 @@ let creer_perso
   perso_save (get_persos (nom ^ ".txt")) (nom, a)
 
 
-let jouer ?(controlIA=[|false;false;false|])
+let jouer
+    ?(controlIA=[|false;false;false|])
     ?(commandes_lettres=1)
     ?(commandes_chiffres=2)
     ?(commandes_souris=3)
@@ -250,10 +252,12 @@ let jouer ?(controlIA=[|false;false;false|])
     ?(force_ordi_j4=0.) ~j1 ~j2 ~j3 niveau =
   let niv1, niv2 = dos niveau in
   let niveau = tab_niveaux.(niv1).(niv2) in
-  let j1 = equilibrer force_j1 (snd (perso_of_string j1)) in
+  let persoj1 = (snd (perso_of_string j1)) in
+  let j1 = equilibrer force_j1 persoj1 in
   let j2 = equilibrer force_j2 (snd (perso_of_string j2)) in
   let j3 = equilibrer force_j3 (snd (perso_of_string j3)) in
   jeu
+    ~temps_paye:2.
     ~niveau:(snd niveau)
     ~j1:(j1)
     ~j2:(j2)

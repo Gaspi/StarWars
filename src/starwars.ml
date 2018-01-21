@@ -19,7 +19,7 @@ let _ =
     presentation_niveau 2 1;
     *)
 
-    (**)
+    (*
     creer_perso
       ~furtif:false
       ~diplomatie_vol:true
@@ -50,7 +50,7 @@ let _ =
       ~vitesse:1.
       ~combat_spatial:1.3
       "pp";
-    (**)
+    *)
     
     
     (*
@@ -66,10 +66,10 @@ let _ =
     *)
     
     jouer
-      ~j1:"->gaspi"
+      ~j1:"1x0"
       ~j2:"0x0"
-      ~j3:"->pp"
-      ~controlIA:[|false;true;false|]
+      ~j3:"1x1"
+      ~controlIA:[|false;false;false|]
       ~commandes_lettres:1
       ~commandes_chiffres:2
       ~commandes_souris:3

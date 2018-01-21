@@ -632,14 +632,18 @@ begin
   in
   
   (* main : *)
+  let frames = ref 0 in
+  let t0 = Sys.time () in
+  
   while key_pressed () do ignore (read_key ()) done;
   chrono_paye := Sys.time ();
   chrono_actu := Sys.time ();
   while !continue do
     if key_pressed () then traite_touche (read_key ());
     if button_down () && not ordi.(c3) then traite_clic (mouse_pos ());
+    incr frames;
     aff_univers select;
-
+    
     let t = Sys.time () in
     if t > !chrono_paye +. temps_paye *. !vitesse
     then
@@ -653,7 +657,13 @@ begin
       begin
         actu_univers ();
         chrono_actu := !chrono_actu +. !vitesse
-      end
+      end;
+(*
+    let wait_time = !chrono_actu +. !vitesse -. Sys.time () in
+    if wait_time > 0.
+    then Unix.sleepf(wait_time);
+*)
   done;
-
+  let dt = Sys.time () -. t0 in
+  debug "Frames : %i\nTime: %f\nFPS: %f\n" (!frames) (dt) ( (float_of_int !frames) /. dt)
 end
