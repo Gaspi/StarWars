@@ -1,4 +1,5 @@
 
+open Basic
 open Kernel
 open Front
 
@@ -46,16 +47,21 @@ let _ =
       ~combat_spatial:1.3
       "pp";
     
-    (* rajouter ici toute fonction pouvant aider
-       les blaireaux *)
-    let affiche_colonne_perso j =
-      for i = 0 to 6 do
+    
+    
+    (*
+    for j = 0 to (Array.length tab_persos) - 1 do
+      for i = 0 to (Array.length tab_persos.(j)) - 1 do
         print_int i;
         print_string " : ";
         print_perso tab_persos.(j).(i);
         print_newline ();
         print_newline ()
-      done in
+      done
+    done;
+    *)
+    
+    
     
     jouer
       ~j1:"->gaspi"
@@ -72,7 +78,6 @@ let _ =
       ~force_ordi_j4:0.8
       "2x1";    (*le dernier parametre est le niveau choisi *)
     
-    affiche_colonne_perso 1;
     
     terminate ()
 
