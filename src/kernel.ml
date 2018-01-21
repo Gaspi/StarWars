@@ -160,6 +160,7 @@ let equilibrer force p =
   if p.vit <= 0. then failwith "vitesse negative";
   if force <= 0. then p
   else
+    let _ = debug "test\n" in
     let srd b f = if b then f else 1. in
     let norme = (p.atk +. p.def +. p.vol) /. 3. in
     let coef = force *.
@@ -185,7 +186,7 @@ let jeu ?(temps_paye=16.) ?(nbet=0.005) ?(vitess=1.) ?(control_lettres=1)
     ?(control_chiffres=2) ?(control_souris=3) ?(ordi=[|false;false;false|])
     ?(force_ordi=0.) ~niveau:(niveau:niveau) ~j1:j1 ~j2:j2 ~j3:j3 () =
 begin
-  
+  debug "Test\n";
   let (c1,c2,c3) = (control_lettres-1, control_chiffres-1, control_souris-1) in
   let prb_mouse = ref (0,0) in
   victoire := 0;

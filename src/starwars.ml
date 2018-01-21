@@ -50,7 +50,7 @@ let _ =
       ~combat_spatial:1.3
       "pp";
     (**)
-
+    
     
     (*
     let affiche_colonne_perso j =
@@ -69,7 +69,6 @@ let _ =
     affiche_colonne_perso 2;
     affiche_colonne_perso 3;
     *)
-    
     
     jouer
       ~j1:"->gaspi"
