@@ -52,7 +52,8 @@ let load_sprites () =
 
 let element e tab =
   let t = Array.length tab in
-  let i =ref 0 in
+  let i = ref 0 in
+  
   while !i < t && tab.(!i) <> e do incr i done;
   if !i = t then None else Some !i
 
@@ -148,33 +149,35 @@ let vrai_revenu prod = function
   | Adaptee -> prod
   | Riche -> if prod <= 1 then 1 + prod else prod
 
+let strength_multiplicator = function
+  | Neanderthal -> 4.
+  | Adaptee     -> 1.
+  | Riche       -> 0.80
+  | Industriel  -> 0.85
+  | Fermier     -> 2.
+
 let equilibrer force p =
   if p.vit <= 0. then failwith "vitesse negative";
   if force <= 0. then p
   else
-    begin
-      let srd b f = if b then f else 1. in
-      let norme = (p.atk +. p.def +. p.vol) /. 3. in
-      let coef = force *.
-                 (p.vit ** (-.1./.3.2)) /. norme *.
-                 srd p.defenseur 0.87 *.
-                 srd p.terrifiant 0.94 *.
-                 srd p.dipl_def 0.95 *.
-                 srd p.dipl_vol 0.92 *.
-                 srd p.dipl_atk 0.95 *.
-                 srd p.furtif 0.96 *.
-                 srd p.conquerant 0.95 *.
-                 match p.civi with
-                 | Neanderthal -> 4.
-                 | Adaptee -> 1.
-                 | Riche -> 0.80
-                 | Industriel -> 0.85
-                 | Fermier -> 2. in
-      {atk=p.atk *. coef; def=p.def *. coef; vol=p.vol *. coef;
-       vit=p.vit; conquerant=p.conquerant; furtif=p.furtif; dipl_vol=p.dipl_vol;
-       dipl_def =p.dipl_def; dipl_atk=p.dipl_atk; defenseur=p.defenseur;
-       terrifiant=p.terrifiant; civi=p.civi }
-    end
+    let _ = debug "test\n" in
+    let srd b f = if b then f else 1. in
+    let norme = (p.atk +. p.def +. p.vol) /. 3. in
+    let coef = force *.
+               (p.vit ** (-.1./.3.2)) /. norme *.
+               srd p.defenseur 0.87 *.
+               srd p.terrifiant 0.94 *.
+               srd p.dipl_def 0.95 *.
+               srd p.dipl_vol 0.92 *.
+               srd p.dipl_atk 0.95 *.
+               srd p.furtif 0.96 *.
+               srd p.conquerant 0.95 *.
+               (strength_multiplicator p.civi) in
+    { p with
+      atk = p.atk *. coef;
+      def = p.def *. coef;
+      vol = p.vol *. coef
+    }
 
 
 let jeu ?(temps_paye=16.) ?(nbet=0.005) ?(vitess=1.) ?(control_lettres=1)
@@ -182,8 +185,8 @@ let jeu ?(temps_paye=16.) ?(nbet=0.005) ?(vitess=1.) ?(control_lettres=1)
     ?(touches_j2=[|'1';'2';'3';'4';'5';'6';'7';'8';'9';'+';'*';'-';'/';'0';'.'|])
     ?(control_chiffres=2) ?(control_souris=3) ?(ordi=[|false;false;false|])
     ?(force_ordi=0.) ~niveau:(niveau:niveau) ~j1:j1 ~j2:j2 ~j3:j3 () =
-  begin
-
+begin
+  debug "Test\n";
   let (c1,c2,c3) = (control_lettres-1, control_chiffres-1, control_souris-1) in
   let prb_mouse = ref (0,0) in
   victoire := 0;
@@ -513,8 +516,7 @@ let jeu ?(temps_paye=16.) ?(nbet=0.005) ?(vitess=1.) ?(control_lettres=1)
   
   begin
     let t0 = Sys.time () in
-    while Sys.time () -. t0 < 0.5 do
-      set_text_size 24 done
+    while Sys.time () -. t0 < 0.5 do set_text_size 24 done
   end;
   auto_synchronize false;
   
@@ -630,19 +632,28 @@ let jeu ?(temps_paye=16.) ?(nbet=0.005) ?(vitess=1.) ?(control_lettres=1)
   in
   
   (* main : *)
-  
   while key_pressed () do ignore (read_key ()) done;
-  chrono_paye := Sys.time (); chrono_actu := Sys.time ();
+  chrono_paye := Sys.time ();
+  chrono_actu := Sys.time ();
   while !continue do
     if key_pressed () then traite_touche (read_key ());
     if button_down () && not ordi.(c3) then traite_clic (mouse_pos ());
     aff_univers select;
-    if Sys.time () -. !chrono_paye > temps_paye *. !vitesse
-    then (jour_de_paye ();
-          chrono_paye := !chrono_paye +. temps_paye *. !vitesse);
-    if Sys.time () -. !chrono_actu > !vitesse
-    then (actu_univers ();
-          chrono_actu := !chrono_actu +. !vitesse)
+
+    let t = Sys.time () in
+    if t > !chrono_paye +. temps_paye *. !vitesse
+    then
+      begin
+        jour_de_paye ();
+        chrono_paye := !chrono_paye +. temps_paye *. !vitesse
+      end;
+    
+    if t > !chrono_actu +. !vitesse
+    then
+      begin
+        actu_univers ();
+        chrono_actu := !chrono_actu +. !vitesse
+      end
   done;
 
 end

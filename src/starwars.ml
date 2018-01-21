@@ -11,12 +11,15 @@ let _ =
 
     init ();
     
-    (* print_perso_by_name "->napoléon"; *)
-
+    (*
     print_perso_by_name "2x4";
+    *)
     
+    (*
     presentation_niveau 2 1;
+    *)
 
+    (**)
     creer_perso
       ~furtif:false
       ~diplomatie_vol:true
@@ -26,11 +29,12 @@ let _ =
       ~terrifiant:false
       ~civilisation:Adaptee
       ~conquerant:false
-      ~attaque:1.0
-      ~defense:1.0
-      ~vitesse:1.
+      ~attaque:1.01
+      ~defense:1.01
+      ~vitesse:1.01
       ~combat_spatial:1.3
       "gaspi";
+    
     
     creer_perso
       ~furtif:false
@@ -46,7 +50,7 @@ let _ =
       ~vitesse:1.
       ~combat_spatial:1.3
       "pp";
-    
+    (**)
     
     
     (*
@@ -60,8 +64,6 @@ let _ =
       done
     done;
     *)
-    
-    
     
     jouer
       ~j1:"->gaspi"
