@@ -515,8 +515,8 @@ begin
   in
   
   begin
-    let t0 = Sys.time () in
-    while Sys.time () -. t0 < 0.5 do set_text_size 24 done
+    let t0 = Unix.time () in
+    while Unix.time () -. t0 < 0.5 do set_text_size 24 done
   end;
   auto_synchronize false;
   
@@ -539,7 +539,7 @@ begin
   let chrono_actu = ref 0. in
 
   let pause () =
-    let tp = Sys.time () in
+    let tp = Unix.time () in
     let (dx,dy) = text_size "MODE PAUSE : Appuyez sur P pour reprendre" in
     moveto ((taillex - dx) / 2) (tailley-dy-2);
     draw_string "MODE PAUSE : Appuyez sur P pour reprendre";
@@ -550,8 +550,8 @@ begin
       continue := statut.key <> '\027';
       p := statut.key <> 'p' && statut.key <> '\027'
     done;
-    chrono_paye := !chrono_paye +. Sys.time () -. tp;
-    chrono_actu := !chrono_actu +. Sys.time () -. tp
+    chrono_paye := !chrono_paye +. Unix.time () -. tp;
+    chrono_actu := !chrono_actu +. Unix.time () -. tp
   in
   
   let aff_univers s =
@@ -633,18 +633,18 @@ begin
   
   (* main : *)
   let frames = ref 0 in
-  let t0 = Sys.time () in
+  let t0 = Unix.time () in
   
   while key_pressed () do ignore (read_key ()) done;
-  chrono_paye := Sys.time ();
-  chrono_actu := Sys.time ();
+  chrono_paye := Unix.time ();
+  chrono_actu := Unix.time ();
   while !continue do
     if key_pressed () then traite_touche (read_key ());
     if button_down () && not ordi.(c3) then traite_clic (mouse_pos ());
     incr frames;
     aff_univers select;
     
-    let t = Sys.time () in
+    let t = Unix.time () in
     if t > !chrono_paye +. temps_paye *. !vitesse
     then
       begin
@@ -659,11 +659,11 @@ begin
         chrono_actu := !chrono_actu +. !vitesse
       end;
 (*
-    let wait_time = !chrono_actu +. !vitesse -. Sys.time () in
+    let wait_time = !chrono_actu +. !vitesse -. Unix.time () in
     if wait_time > 0.
     then Unix.sleepf(wait_time);
 *)
   done;
-  let dt = Sys.time () -. t0 in
+  let dt = Unix.time () -. t0 in
   debug "Frames : %i\nTime: %f\nFPS: %f\n" (!frames) (dt) ( (float_of_int !frames) /. dt)
 end

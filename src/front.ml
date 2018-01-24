@@ -257,7 +257,7 @@ let jouer
   let j2 = equilibrer force_j2 (snd (perso_of_string j2)) in
   let j3 = equilibrer force_j3 (snd (perso_of_string j3)) in
   jeu
-    ~temps_paye:2.
+    ~temps_paye:16.
     ~niveau:(snd niveau)
     ~j1:(j1)
     ~j2:(j2)
