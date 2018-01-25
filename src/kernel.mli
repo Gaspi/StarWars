@@ -65,7 +65,7 @@ val terminate : unit -> unit
 val jeu :
   ?temps_paye:float ->
   ?nbet:float ->
-  ?vitess:float ->
+  ?init_speed:float ->
   ?control_lettres:int ->
   ?touches_j1:char array ->
   ?touches_j2:char array ->
