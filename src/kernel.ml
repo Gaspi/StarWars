@@ -180,7 +180,7 @@ let equilibrer force p =
     }
 
 
-let jeu ?(temps_paye=16.) ?(nbet=0.005) ?(vitess=1.) ?(control_lettres=1)
+let jeu ?(temps_paye=16.) ?(nbet=0.005) ?(init_speed=1.) ?(control_lettres=1)
     ?(touches_j1=[|'a';'q';'w';'z';'s';'x';'e';'d';'c';'r';'f';'v';'t';'g';'b'|])
     ?(touches_j2=[|'1';'2';'3';'4';'5';'6';'7';'8';'9';'+';'*';'-';'/';'0';'.'|])
     ?(control_chiffres=2) ?(control_souris=3) ?(ordi=[|false;false;false|])
@@ -190,7 +190,7 @@ begin
   let (c1,c2,c3) = (control_lettres-1, control_chiffres-1, control_souris-1) in
   let prb_mouse = ref (0,0) in
   victoire := 0;
-  let vitesse = ref (0.15 /. vitess) in
+  let speed = ref (0.15 /. init_speed) in
   Random.self_init ();
   (* constantes utiles *)
   let (tab_univers, mat_adj, neutre, j4bis, taillex, tailley) = niveau in
@@ -476,16 +476,14 @@ begin
         else
           let f = foi planete.pop *. j.(planete.control).def in
           let f2 = foi t.charge *. j.(t.camp).atk in
-          if    f >= f2 then
-            planete.pop <- iof ((f -. sous_reserve_dipl_def f2 planete.control)
+          if f >= f2
+          then planete.pop <- iof ((f -. sous_reserve_dipl_def f2 planete.control)
                                 /. j.(planete.control).def)
           else (planete.pop <- iof ((f2 -. sous_reserve_dipl_atk f t.camp) /. j.(t.camp).atk)
                                + if j.(t.camp).conquerant then 6 * planete.prod else 0;
                 planete.control <- t.camp );
           aux planete q in
-    for i = 0 to taille - 1 do
-      aux univers.(i) arrivees.(i)
-    done
+    for i = 0 to taille - 1 do  aux univers.(i) arrivees.(i)  done
   in
   
   let jour_de_paye () =
@@ -567,18 +565,18 @@ begin
     Array.iter affiche_etoile univers;
     set_color white;
     for i = 0 to 2 do
-    if s.(i) <> (-1)
-    then (let p = univers.(s.(i)) in
-          draw_circle p.x p.y p.r;
-          draw_circle p.x p.y (p.r+1);
-          draw_circle p.x p.y (p.r-1))
-  done;
+      if s.(i) <> (-1)
+      then (let p = univers.(s.(i)) in
+            draw_circle p.x p.y p.r;
+            draw_circle p.x p.y (p.r+1);
+            draw_circle p.x p.y (p.r-1))
+    done;
     synchronize ()
   in
   
   let traite_touche = function
-    | 'l' -> vitesse := !vitesse *. 1.2
-    | 'm' -> vitesse := !vitesse /. 1.2
+    | 'l' -> speed := !speed *. 1.2
+    | 'm' -> speed := !speed /. 1.2
     | 'p' -> pause ()
     | 'k' -> auto_synchronize false
     | '\027' -> continue := false
@@ -632,7 +630,9 @@ begin
   in
   
   (* main : *)
-  let frames = ref 0 in
+  let frames_cnt = ref 0 in
+  let ticks_cnt = ref 0 in
+  let sleeps_cnt = ref 0 in
   let t0 = Unix.time () in
   
   while key_pressed () do ignore (read_key ()) done;
@@ -641,29 +641,41 @@ begin
   while !continue do
     if key_pressed () then traite_touche (read_key ());
     if button_down () && not ordi.(c3) then traite_clic (mouse_pos ());
-    incr frames;
+    incr frames_cnt;
     aff_univers select;
     
     let t = Unix.time () in
-    if t > !chrono_paye +. temps_paye *. !vitesse
-    then
-      begin
-        jour_de_paye ();
-        chrono_paye := !chrono_paye +. temps_paye *. !vitesse
-      end;
     
-    if t > !chrono_actu +. !vitesse
+    if t > !chrono_actu +. !speed
     then
       begin
+        incr ticks_cnt;
         actu_univers ();
-        chrono_actu := !chrono_actu +. !vitesse
+        chrono_actu := !chrono_actu +. !speed;
+        if t > !chrono_paye +. temps_paye *. !speed
+        then
+          begin
+            jour_de_paye ();
+            chrono_paye := !chrono_paye +. temps_paye *. !speed
+          end
+        
+      end
+    else
+      begin
+        let dt = !chrono_actu +. !speed -. t in
+        let dti = (int_of_float (dt *. 1000.)) in
+        incr sleeps_cnt;
+        debug "Sleeping: %i\n" dti;
+        Unix.sleep dti;
       end;
 (*
-    let wait_time = !chrono_actu +. !vitesse -. Unix.time () in
+    let wait_time = !chrono_actu +. !speed -. Unix.time () in
     if wait_time > 0.
     then Unix.sleepf(wait_time);
 *)
   done;
   let dt = Unix.time () -. t0 in
-  debug "Frames : %i\nTime: %f\nFPS: %f\n" (!frames) (dt) ( (float_of_int !frames) /. dt)
+  debug "Frames : %i\nTime: %f\nFPS: %f\n" (!frames_cnt) (dt) ( (float_of_int !frames_cnt) /. dt);
+  debug "Ticks : %i\nTime: %f\nFPS: %f\n" (!ticks_cnt) (dt) ( (float_of_int !ticks_cnt) /. dt);
+  debug "Sleeps : %i\nTime: %f\nFPS: %f\n" (!sleeps_cnt) (dt) ( (float_of_int !sleeps_cnt) /. dt)
 end
