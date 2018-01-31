@@ -28,15 +28,30 @@ let print_civi = function
 
 (* code du jeu *)
 
-let init () =
-  open_graph " 1x1"
+let init () = open_graph " 1x1"
 
-let terminate () =
-  close_graph ()
+let terminate () = close_graph ()
 
 
+(* Useful misc *)
 
-let deltay = 0
+let time = Unix.gettimeofday
+
+let iof x = int_of_float (x+.0.5)
+
+let foi x = float_of_int x
+
+let ri = Random.int
+
+let element e tab =
+  let t = Array.length tab in
+  let i = ref 0 in
+  while !i < t && tab.(!i) <> e do incr i done;
+  if !i = t then None else Some !i
+
+let dist_d (a,b) (c,d) = max (abs (a - c)) (abs (b-d))
+
+(* Graphical functions *)
 
 let load_sprites () =
   let b1 = fst (get_img_bmp (get_include "boom1")) in
@@ -47,23 +62,21 @@ let load_sprites () =
   let tb3 = set_color_transp black b3 in
   (tb1, tb2, tb3)
 
+let generate_background taillex tailley star_density =
+  begin
+    set_color black;
+    fill_rect 0 0 taillex tailley;
+    set_color white;
+    for i = 0 to iof (foi (taillex * tailley) *. star_density)
+    do plot (ri taillex) (ri tailley) done;
+    synchronize ();
+    get_image 0 0 taillex tailley
+  end
 
-(* paramètres : *)
 
-let element e tab =
-  let t = Array.length tab in
-  let i = ref 0 in
-  
-  while !i < t && tab.(!i) <> e do incr i done;
-  if !i = t then None else Some !i
+(* Parameters : *)
 
-let iof x = int_of_float (x+.0.5)
-
-let foi x = float_of_int x
-
-let ri = Random.int
-
-let dist_d (a,b) (c,d) = max (abs (a - c)) (abs (b-d))
+let deltay = 0
 
 
 let mat_chemin_of_mat_adj mat_adj =
@@ -513,31 +526,23 @@ begin
   in
   
   begin
-    let t0 = Unix.time () in
-    while Unix.time () -. t0 < 0.5 do set_text_size 24 done
+    let t0 = time () in
+    while time () -. t0 < 0.5 do set_text_size 24 done
   end;
-  auto_synchronize false;
+  auto_synchronize true;
   
   let select = [| -1; -1; -1 |] in
   
   let continue = ref true in
   
-  let fond = begin
-    set_color black;
-    fill_rect 0 0 taillex tailley;
-    set_color white;
-    for i = 0 to iof (foi (taillex * tailley) *. nbet)
-    do plot (ri taillex) (ri tailley) done;
-    synchronize ();
-    get_image 0 0 taillex tailley
-  end in
+  let background = generate_background taillex tailley nbet in
   
   let chrono_paye = ref 0. in
   
   let chrono_actu = ref 0. in
 
   let pause () =
-    let tp = Unix.time () in
+    let tp = time () in
     let (dx,dy) = text_size "MODE PAUSE : Appuyez sur P pour reprendre" in
     moveto ((taillex - dx) / 2) (tailley-dy-2);
     draw_string "MODE PAUSE : Appuyez sur P pour reprendre";
@@ -548,13 +553,13 @@ begin
       continue := statut.key <> '\027';
       p := statut.key <> 'p' && statut.key <> '\027'
     done;
-    chrono_paye := !chrono_paye +. Unix.time () -. tp;
-    chrono_actu := !chrono_actu +. Unix.time () -. tp
+    chrono_paye := !chrono_paye +. time () -. tp;
+    chrono_actu := !chrono_actu +. time () -. tp
   in
   
   let aff_univers s =
     clear_graph ();
-    draw_image fond 0 0;
+    draw_image background 0 0;
     aff_evenements ();
     set_color white;
     for i = 0 to taille - 1 do
@@ -633,18 +638,18 @@ begin
   let frames_cnt = ref 0 in
   let ticks_cnt = ref 0 in
   let sleeps_cnt = ref 0 in
-  let t0 = Unix.time () in
+  let t0 = time () in
   
   while key_pressed () do ignore (read_key ()) done;
-  chrono_paye := Unix.time ();
-  chrono_actu := Unix.time ();
+  chrono_paye := time ();
+  chrono_actu := time ();
   while !continue do
     if key_pressed () then traite_touche (read_key ());
     if button_down () && not ordi.(c3) then traite_clic (mouse_pos ());
     incr frames_cnt;
     aff_univers select;
     
-    let t = Unix.time () in
+    let t = time () in
     
     if t > !chrono_actu +. !speed
     then
@@ -660,22 +665,8 @@ begin
           end
         
       end
-    else
-      begin
-        let dt = !chrono_actu +. !speed -. t in
-        let dti = (int_of_float (dt *. 1000.)) in
-        incr sleeps_cnt;
-        debug "Sleeping: %i\n" dti;
-        Unix.sleep dti;
-      end;
-(*
-    let wait_time = !chrono_actu +. !speed -. Unix.time () in
-    if wait_time > 0.
-    then Unix.sleepf(wait_time);
-*)
   done;
-  let dt = Unix.time () -. t0 in
+  let dt = time () -. t0 in
   debug "Frames : %i\nTime: %f\nFPS: %f\n" (!frames_cnt) (dt) ( (float_of_int !frames_cnt) /. dt);
   debug "Ticks : %i\nTime: %f\nFPS: %f\n" (!ticks_cnt) (dt) ( (float_of_int !ticks_cnt) /. dt);
-  debug "Sleeps : %i\nTime: %f\nFPS: %f\n" (!sleeps_cnt) (dt) ( (float_of_int !sleeps_cnt) /. dt)
 end
